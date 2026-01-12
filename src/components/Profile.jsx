@@ -1,0 +1,498 @@
+import React, { useState } from 'react';
+import { ChevronDown, Edit2, Save, X, Mail, Phone, MapPin, Building2, Shield } from 'lucide-react';
+
+export default function ProfileDropdown() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState({
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+    phone: '+1 (555) 123-4567',
+    location: 'New York, USA',
+    organization: 'RecoverPro Bank',
+    role: 'Super Admin',
+    status: 'Active'
+  });
+
+  const [editData, setEditData] = useState(profileData);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditData(profileData);
+  };
+
+  const handleSave = () => {
+    setProfileData(editData);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+
+  const handleChange = (field, value) => {
+    setEditData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        body {
+          background: #0f172a;
+        }
+
+        .profile-wrapper {
+          position: relative;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .profile-trigger {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          cursor: pointer;
+          padding: 6px 12px 6px 6px;
+          border-radius: 8px;
+          transition: all 0.2s;
+          background: none;
+          border: none;
+          backdrop-filter: blur(10px);
+        }
+
+        .profile-trigger:hover {
+          background: rgba(96, 165, 250, 0.1);
+          border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        .profile-pic {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          font-weight: 600;
+          font-size: 15px;
+          flex-shrink: 0;
+        }
+
+        .profile-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .profile-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: #f0f4f8;
+        }
+
+        .profile-role {
+          font-size: 12px;
+          color: #8b94a5;
+        }
+
+        .profile-dropdown {
+          position: fixed;          
+          top: 16px;                
+          right: 16px;      
+          background: linear-gradient(135deg, #1a2332 0%, #151e2b 100%);
+          border: 1px solid rgba(42, 63, 82, 0.8);
+          border-radius: 12px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          z-index: 1000;
+          width: 340px;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-10px);
+          transition: all 0.2s ease;
+          backdrop-filter: blur(20px);
+        }
+
+
+        .profile-dropdown.open {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .dropdown-header {
+          padding: 0px; 
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-start;
+        }
+
+        .dropdown-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: #f0f4f8;
+        }
+
+        .dropdown-actions {
+          display: flex;
+          gap: 8px;
+        }
+
+        .icon-btn-small {
+          background: rgba(96, 165, 250, 0.1);
+          border: 1px solid rgba(96, 165, 250, 0.2);
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          color: #8b94a5;
+        }
+
+        .icon-btn-small:hover {
+          background: rgba(96, 165, 250, 0.2);
+          color: #60a5fa;
+          border-color: rgba(96, 165, 250, 0.4);
+        }
+
+        .dropdown-content {
+          padding: 20px;
+        }
+
+        .profile-section {
+          display: flex;
+          gap: 16px;
+          padding-bottom: 30px;
+        }
+
+        .profile-avatar-large {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          font-size: 32px;
+          font-weight: 700;
+          flex-shrink: 0;
+          box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+
+        .profile-details {
+          padding-top: 12px;
+          flex: 1;
+        }
+
+        .profile-name-large {
+          font-size: 16px;
+          font-weight: 700;
+          color: #f0f4f8;
+          margin-bottom: 4px;
+        }
+
+        .profile-badge {
+          display: inline-block;
+          padding: 4px 10px;
+          background: rgba(34, 197, 94, 0.15);
+          color: #4ade80;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 600;
+          margin-top: 6px;
+          border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .info-group {
+          margin-bottom: 16px;
+          display: none;
+        }
+
+        .info-group.show {
+          display: block;
+        }
+
+        .info-label {
+          font-size: 11px;
+          font-weight: 600;
+          color: #8b94a5;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 6px;
+        }
+
+        .info-value {
+          font-size: 13px;
+          color: #d1d8e0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .info-value svg {
+          color: #60a5fa;
+          flex-shrink: 0;
+        }
+
+        .field-input {
+          width: 100%;
+          padding: 8px 10px;
+          border: 1px solid rgba(42, 63, 82, 0.6);
+          border-radius: 6px;
+          font-size: 13px;
+          color: #f0f4f8;
+          background: rgba(15, 23, 42, 0.5);
+          font-family: 'Inter', sans-serif;
+          transition: all 0.2s;
+          margin-bottom: 12px;
+        }
+
+        .field-input::placeholder {
+          color: #6b7a8a;
+        }
+
+        .field-input:focus {
+          outline: none;
+          border-color: #60a5fa;
+          background: rgba(15, 23, 42, 0.8);
+          box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 8px;
+          padding-top: 16px;
+          border-top: 1px solid rgba(42, 63, 82, 0.6);
+          margin-top: 16px;
+        }
+
+        .btn-small {
+          flex: 1;
+          padding: 8px 12px;
+          border-radius: 6px;
+          border: none;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+
+        .btn-primary-small {
+          background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+          color: #fff;
+          border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-primary-small:hover {
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+          border-color: rgba(96, 165, 250, 0.5);
+        }
+
+        .btn-secondary-small {
+          background: rgba(96, 165, 250, 0.1);
+          color: #60a5fa;
+          border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-secondary-small:hover {
+          background: rgba(96, 165, 250, 0.2);
+          border-color: rgba(96, 165, 250, 0.5);
+        }
+
+        .btn-danger-small {
+          background: rgba(239, 68, 68, 0.1);
+          color: #f87171;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger-small:hover {
+          background: rgba(239, 68, 68, 0.2);
+          border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .edit-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+      `}</style>
+
+      <div className="profile-wrapper">
+        <button className="profile-trigger" onClick={() => setIsOpen(!isOpen)}>
+          <div className="profile-pic">
+            {profileData.firstName.charAt(0)}{profileData.lastName.charAt(0)}
+          </div>
+          <div className="profile-info">
+            <div className="profile-name">{profileData.firstName} {profileData.lastName}</div>
+            <div className="profile-role">{profileData.role}</div>
+          </div>
+          <ChevronDown size={18} color="#8b94a5" />
+        </button>
+
+        <div className={`profile-dropdown ${isOpen ? 'open' : ''}`}>
+          <div className="dropdown-content">
+            {!isEditing ? (
+              <>
+                <div className="profile-section">
+                  <div className="profile-avatar-large">
+                    {profileData.firstName.charAt(0)}{profileData.lastName.charAt(0)}
+                  </div>
+                  <div className="profile-details">
+                    <div className="profile-name-large">
+                      {profileData.firstName} {profileData.lastName}
+                    </div>
+                    <div className="profile-badge">{profileData.status}</div>
+                  </div>
+                  <div className="dropdown-header">
+                    <div className="dropdown-actions">
+                      <button className="icon-btn-small" onClick={() => setIsOpen(false)} title="Close">
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Role</div>
+                  <div className="info-value">
+                    <Shield size={14} />
+                    {profileData.role}
+                  </div>
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Email</div>
+                  <div className="info-value">
+                    <Mail size={14} />
+                    {profileData.email}
+                  </div>
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Phone</div>
+                  <div className="info-value">
+                    <Phone size={14} />
+                    {profileData.phone}
+                  </div>
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Location</div>
+                  <div className="info-value">
+                    <MapPin size={14} />
+                    {profileData.location}
+                  </div>
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Organization</div>
+                  <div className="info-value">
+                    <Building2 size={14} />
+                    {profileData.organization}
+                  </div>
+                </div>
+
+
+              </>
+            ) : (
+              <>
+                <div className="info-group show">
+                  <div className="info-label">First Name</div>
+                  <input
+                    type="text"
+                    className="field-input"
+                    value={editData.firstName}
+                    onChange={(e) => handleChange('firstName', e.target.value)}
+                    placeholder="First Name"
+                  />
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Last Name</div>
+                  <input
+                    type="text"
+                    className="field-input"
+                    value={editData.lastName}
+                    onChange={(e) => handleChange('lastName', e.target.value)}
+                    placeholder="Last Name"
+                  />
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Email</div>
+                  <input
+                    type="email"
+                    className="field-input"
+                    value={editData.email}
+                    onChange={(e) => handleChange('email', e.target.value)}
+                  />
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Phone</div>
+                  <input
+                    type="tel"
+                    className="field-input"
+                    value={editData.phone}
+                    onChange={(e) => handleChange('phone', e.target.value)}
+                  />
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Location</div>
+                  <input
+                    type="text"
+                    className="field-input"
+                    value={editData.location}
+                    onChange={(e) => handleChange('location', e.target.value)}
+                  />
+                </div>
+
+                <div className="info-group show">
+                  <div className="info-label">Organization</div>
+                  <input
+                    type="text"
+                    className="field-input"
+                    value={editData.organization}
+                    onChange={(e) => handleChange('organization', e.target.value)}
+                  />
+                </div>
+
+                <div className="action-buttons">
+                  <button className="btn-small btn-primary-small" onClick={handleSave}>
+                    <Save size={14} />
+                    Save
+                  </button>
+                  <button className="btn-small btn-danger-small" onClick={handleCancel}>
+                    <X size={14} />
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
