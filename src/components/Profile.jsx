@@ -6,8 +6,8 @@ export default function ProfileDropdown() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
+    lastName: 'D',
+    email: 'john.d@example.com',
     phone: '+1 (555) 123-4567',
     location: 'New York, USA',
     organization: 'RecoverPro Bank',

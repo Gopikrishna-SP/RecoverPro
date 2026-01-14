@@ -67,53 +67,64 @@ export default function SearchBar() {
         }
 
         .search-bar {
+          position: relative;
           display: flex;
           align-items: center;
-          gap: 8px;
-          background: rgba(30, 41, 59, 0.8);
-          padding: 10px 16px;
+          background: none;
+          padding: 10px 12px;
           border-radius: 8px;
-          border: 1px solid rgba(42, 63, 82, 0.6);
-          transition: all 0.2s;
-          backdrop-filter: blur(10px);
         }
 
-        .search-bar:focus-within {
-          background: rgba(30, 41, 59, 0.95);
-          border-color: #60a5fa;
-          box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15), 0 10px 30px rgba(0, 0, 0, 0.3);
+
+        .search-bar {
+          position: relative;
+          display: flex;
+          align-items: center;
+          background: rgba(30, 41, 59, 0.6);
+          padding: 10px 12px;
+          border-radius: 8px;
         }
+
 
         .search-icon {
+          position: absolute;
+          left: 20px;                 /* 👈 move inside */
+          top: 50%;
+          transform: translateY(-50%);
           color: #6b7a8a;
-          flex-shrink: 0;
+          pointer-events: none;
         }
 
+
+
+
         .search-input {
-          border: none;
-          background: none;
-          outline: none;
           width: 100%;
+          padding-left: 44px;        /* 👈 MUST be > icon left */
+          padding-right: 36px;
+          border: none;
+          background: transparent;
+          outline: none;
           font-size: 14px;
           color: #f0f4f8;
-          font-family: 'Inter', sans-serif;
         }
+
+
 
         .search-input::placeholder {
           color: #6b7a8a;
         }
 
         .clear-btn {
+          position: absolute;
+          right: 12px;
           background: none;
           border: none;
           cursor: pointer;
           color: #6b7a8a;
-          transition: color 0.2s;
-          display: flex;
-          align-items: center;
-          padding: 4px;
-          flex-shrink: 0;
         }
+
+
 
         .clear-btn:hover {
           color: #60a5fa;
@@ -274,26 +285,27 @@ export default function SearchBar() {
 
       <div className="search-wrapper">
         <div className="search-bar">
-          <Search size={18} className="search-icon" />
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search..."
-            value={searchValue}
-            onChange={(e) => handleSearch(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleSearchSubmit(searchValue);
-              }
-            }}
-          />
-          {searchValue && (
-            <button className="clear-btn" onClick={handleClearSearch}>
-              <X size={16} />
-            </button>
-          )}
-        </div>
+  <Search size={18} className="search-icon" />
+  <input
+    type="text"
+    className="search-input"
+    placeholder="Search..."
+    value={searchValue}
+    onChange={(e) => handleSearch(e.target.value)}
+    onFocus={() => setIsFocused(true)}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter') {
+        handleSearchSubmit(searchValue);
+      }
+    }}
+  />
+  {searchValue && (
+    <button className="clear-btn" onClick={handleClearSearch}>
+      <X size={16} />
+    </button>
+  )}
+</div>
+
 
         <div className={`search-dropdown ${isFocused ? 'open' : ''}`}>
           {searchValue ? (

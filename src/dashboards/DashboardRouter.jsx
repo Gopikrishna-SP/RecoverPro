@@ -5,7 +5,7 @@ import FEDashboard from "./FEDash";
 
 export default function DashboardRouter() {
   // TEMP role (no JWT yet)
-  const role = "super_admin"; 
+  const role = "field_executive"; 
 
   switch (role) {
     case "super_admin":

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Bell } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
-import SearchBar from '../components/SearchBar';
+import SearchBar from '../components/Searchbar';
 import ProfileDropdown from '../components/Profile';
 
 export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
@@ -20,7 +20,7 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
 
         body {
           font-family: 'Inter', sans-serif;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+          background: linear-gradient(135deg, #0f172a 0%, #1a1f35 50%, #0f172a 100%);
           min-height: 100vh;
           margin: 0;
           padding: 0;
@@ -33,7 +33,7 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
           width: 100%;
           margin: 0;
           padding: 0;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+          background: linear-gradient(135deg, #0f172a 0%, #1a1f35 50%, #0f172a 100%);
         }
 
         .main-content {
@@ -52,14 +52,13 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
         }
 
         .topbar {
-          background: #0f1419f2;
+          background: rgba(15, 23, 42, 0.8);
           padding: 12px 24px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid rgba(71, 85, 105, 0.2);
           width: 100%;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.04);
           flex-shrink: 0;
         }
 
@@ -120,6 +119,8 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
           padding: 24px;
           width: 100%;
           overflow-y: auto;
+          background: transparent; /* Let the body gradient show through */
+
         }
 
         @media (max-width: 1024px) {
