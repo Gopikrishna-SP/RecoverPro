@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { Bell } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import SearchBar from '../components/Searchbar';
 import ProfileDropdown from '../components/Profile';
+import NotificationDisplay from '../components/NotificationDisplay';
 
 export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const location = useLocation();
+  const showSearch = location.pathname === '/dashboard';
+
 
   return (
     <>
@@ -38,8 +43,8 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
 
         .main-content {
           flex: 1;
-          margin-left: 230px;              /* FIXED */
-          width: calc(100% - 230px);       /* FIXED */
+          margin-left: 230px;
+          width: calc(100% - 230px);
           display: flex;
           flex-direction: column;
           min-height: 100vh;
@@ -60,6 +65,8 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
           border-bottom: 1px solid rgba(71, 85, 105, 0.2);
           width: 100%;
           flex-shrink: 0;
+          position: relative;
+          z-index: 50;
         }
 
         .topbar-left {
@@ -67,6 +74,14 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
           align-items: center;
           gap: 24px;
           flex: 1;
+          min-width: 0;
+          width: 100%;
+        }
+
+        .search-wrapper-topbar {
+          flex: 1;
+          min-width: 200px;
+          max-width: 500px;
         }
 
         .page-title {
@@ -76,15 +91,12 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
           min-width: fit-content;
         }
 
-        .search-wrapper-topbar {
-          flex: 0 1 400px;
-        }
-
         .topbar-right {
           display: flex;
           align-items: center;
           gap: 16px;
           margin-left: auto;
+          position: relative;
         }
 
         .icon-btn {
@@ -104,23 +116,14 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
         }
 
 
-        .notification-badge {
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          width: 8px;
-          height: 8px;
-          background: #ef4444;
-          border-radius: 50%;
-        }
-
         .content-area {
           flex: 1;
           padding: 24px;
           width: 100%;
           overflow-y: auto;
-          background: transparent; /* Let the body gradient show through */
-
+          background: transparent;
+          position: relative;
+          z-index: 1;
         }
 
         @media (max-width: 1024px) {
@@ -187,21 +190,18 @@ export default function DashboardLayout({ children, pageTitle = 'Dashboard' }) {
           <div className="topbar">
             <div className="topbar-left">
               <div className="search-wrapper-topbar">
-                <SearchBar />
+                {showSearch && <SearchBar />}
               </div>
             </div>
 
             <div className="topbar-right">
-              <button className="icon-btn">
-                <Bell size={20} />
-                <span className="notification-badge"></span>
-              </button>
+              <NotificationDisplay />
               <ProfileDropdown />
             </div>
           </div>
 
           <div className="content-area">
-            {children}
+            <Outlet />
           </div>
         </div>
       </div>

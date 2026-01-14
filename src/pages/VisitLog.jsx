@@ -438,7 +438,7 @@ export default function VisitLog() {
                       {ALL_COLUMNS.map(col => (
                         <td key={`${idx}-${col}`} title={row[col] || '-'}>
                           {col === 'amount' || col === 'emi' || col === 'posInCr'
-                            ? <span className="currency">₹{typeof row[col] === 'number' ? row[col].toLocaleString() : row[col] || '-'}</span>
+                            ? <span className="currency">â‚¹{typeof row[col] === 'number' ? row[col].toLocaleString() : row[col] || '-'}</span>
                             : col === 'visitDate' || col === 'ptpDate'
                             ? <span className="date">{row[col] || '-'}</span>
                             : col === 'disp'

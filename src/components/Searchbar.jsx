@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { Search, X, Clock, TrendingUp } from 'lucide-react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export default function SearchBar() {
   const [searchValue, setSearchValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const location = useLocation();
+useEffect(() => {
+  setIsFocused(false);
+  setSearchValue('');
+}, []);
+
   const [recentSearches, setRecentSearches] = useState([
     'Dashboard Analytics',
     'User Management',
@@ -46,265 +54,248 @@ export default function SearchBar() {
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-        * {
-          box-sizing: border-box;
-          margin: 0;
-          padding: 0;
-        }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-        body {
-          background: #0f172a;
-        }
+body {
+  background: #0f172a;
+}
 
-        .search-wrapper {
-          position: relative;
-          font-family: 'Inter', sans-serif;
-          width: 100%;
-          max-width: 400px;
-        }
+.search-wrapper {
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+}
 
-        .search-bar {
-          position: relative;
-          display: flex;
-          align-items: center;
-          background: none;
-          padding: 10px 12px;
-          border-radius: 8px;
-        }
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  padding: 10px 12px;
+  border-radius: 8px;
+  width: 100%;
+}
 
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #64748b;
+  pointer-events: none;
+}
 
-        .search-bar {
-          position: relative;
-          display: flex;
-          align-items: center;
-          background: rgba(30, 41, 59, 0.6);
-          padding: 10px 12px;
-          border-radius: 8px;
-        }
+.search-input {
+  width: 100%;
+  padding-left: 40px;
+  padding-right: 40px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: #e2e8f0;
+}
 
+.search-input::placeholder {
+  color: #64748b;
+}
 
-        .search-icon {
-          position: absolute;
-          left: 20px;                 /* 👈 move inside */
-          top: 50%;
-          transform: translateY(-50%);
-          color: #6b7a8a;
-          pointer-events: none;
-        }
+.search-input:focus {
+  color: #ffffff;
+}
 
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7a8a;
+  padding: 4px;
+}
 
+.clear-btn:hover {
+  color: #60a5fa;
+}
 
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #1a2332 0%, #151e2b 100%);
+  border: 1px solid rgba(42, 63, 82, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  max-height: 400px;
+  overflow-y: auto;
+  backdrop-filter: blur(20px);
+}
 
-        .search-input {
-          width: 100%;
-          padding-left: 44px;        /* 👈 MUST be > icon left */
-          padding-right: 36px;
-          border: none;
-          background: transparent;
-          outline: none;
-          font-size: 14px;
-          color: #f0f4f8;
-        }
+.search-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
 
+.dropdown-section {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(42, 63, 82, 0.5);
+}
 
+.dropdown-section:last-child {
+  border-bottom: none;
+}
 
-        .search-input::placeholder {
-          color: #6b7a8a;
-        }
+.section-title {
+  padding: 0 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
 
-        .clear-btn {
-          position: absolute;
-          right: 12px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: #6b7a8a;
-        }
+.search-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #d1d8e0;
+  font-size: 14px;
+}
 
+.search-item:hover {
+  background: rgba(96, 165, 250, 0.1);
+  color: #60a5fa;
+}
 
+.search-item-icon {
+  flex-shrink: 0;
+  color: #6b7a8a;
+}
 
-        .clear-btn:hover {
-          color: #60a5fa;
-        }
+.search-item:hover .search-item-icon {
+  color: #60a5fa;
+}
 
-        .search-dropdown {
-          position: absolute;
-          top: 100%;
-          left: 0;
-          right: 0;
-          margin-top: 8px;
-          background: linear-gradient(135deg, #1a2332 0%, #151e2b 100%);
-          border: 1px solid rgba(42, 63, 82, 0.8);
-          border-radius: 12px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-          z-index: 1000;
-          opacity: 0;
-          visibility: hidden;
-          transform: translateY(-10px);
-          transition: all 0.2s ease;
-          max-height: 400px;
-          overflow-y: auto;
-          backdrop-filter: blur(20px);
-        }
+.search-item-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-        .search-dropdown.open {
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(0);
-        }
+.search-item-label {
+  font-weight: 500;
+}
 
-        .dropdown-section {
-          padding: 12px 0;
-          border-bottom: 1px solid rgba(42, 63, 82, 0.5);
-        }
+.search-item-category {
+  font-size: 12px;
+  color: #6b7a8a;
+}
 
-        .dropdown-section:last-child {
-          border-bottom: none;
-        }
+.remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7a8a;
+  transition: color 0.2s;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
 
-        .section-title {
-          padding: 0 16px;
-          font-size: 11px;
-          font-weight: 700;
-          color: #6b7a8a;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 8px;
-        }
+.remove-btn:hover {
+  color: #f87171;
+}
 
-        .search-item {
-          padding: 10px 16px;
-          cursor: pointer;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          color: #d1d8e0;
-          font-size: 14px;
-        }
+.empty-state {
+  padding: 32px 16px;
+  text-align: center;
+  color: #6b7a8a;
+}
 
-        .search-item:hover {
-          background: rgba(96, 165, 250, 0.1);
-          color: #60a5fa;
-        }
+.empty-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
 
-        .search-item-icon {
-          flex-shrink: 0;
-          color: #6b7a8a;
-        }
+.empty-text {
+  font-size: 14px;
+}
 
-        .search-item:hover .search-item-icon {
-          color: #60a5fa;
-        }
+.search-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
 
-        .search-item-content {
-          flex: 1;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
+.search-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-        .search-item-label {
-          font-weight: 500;
-        }
+.search-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(96, 165, 250, 0.2);
+  border-radius: 3px;
+}
 
-        .search-item-category {
-          font-size: 12px;
-          color: #6b7a8a;
-        }
+.search-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 165, 250, 0.3);
+}
 
-        .remove-btn {
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: #6b7a8a;
-          transition: color 0.2s;
-          padding: 4px;
-          display: flex;
-          align-items: center;
-        }
+@media (max-width: 768px) {
+  .search-wrapper {
+    max-width: 100%;
+  }
 
-        .remove-btn:hover {
-          color: #f87171;
-        }
+  .search-dropdown {
+    width: 100vw;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    border-radius: 0;
+    max-height: 60vh;
+  }
 
-        .empty-state {
-          padding: 32px 16px;
-          text-align: center;
-          color: #6b7a8a;
-        }
-
-        .empty-icon {
-          font-size: 32px;
-          margin-bottom: 8px;
-        }
-
-        .empty-text {
-          font-size: 14px;
-        }
-
-        /* Scrollbar styling */
-        .search-dropdown::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .search-dropdown::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .search-dropdown::-webkit-scrollbar-thumb {
-          background: rgba(96, 165, 250, 0.2);
-          border-radius: 3px;
-        }
-
-        .search-dropdown::-webkit-scrollbar-thumb:hover {
-          background: rgba(96, 165, 250, 0.3);
-        }
-
-        @media (max-width: 768px) {
-          .search-wrapper {
-            max-width: 100%;
-          }
-
-          .search-dropdown {
-            width: 100vw;
-            left: 50%;
-            transform: translateX(-50%) translateY(0);
-            border-radius: 0;
-            max-height: 60vh;
-          }
-
-          .search-dropdown.open {
-            transform: translateX(-50%) translateY(0);
-          }
-        }
-      `}</style>
+  .search-dropdown.open {
+    transform: translateX(-50%) translateY(0);
+  }
+}`}</style>
 
       <div className="search-wrapper">
         <div className="search-bar">
-  <Search size={18} className="search-icon" />
-  <input
-    type="text"
-    className="search-input"
-    placeholder="Search..."
-    value={searchValue}
-    onChange={(e) => handleSearch(e.target.value)}
-    onFocus={() => setIsFocused(true)}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter') {
-        handleSearchSubmit(searchValue);
-      }
-    }}
-  />
-  {searchValue && (
-    <button className="clear-btn" onClick={handleClearSearch}>
-      <X size={16} />
-    </button>
-  )}
-</div>
+          <Search size={18} className="search-icon" />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search..."
+            value={searchValue}
+            onChange={(e) => handleSearch(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearchSubmit(searchValue);
+              }
+            }}
+          />
+          {searchValue && (
+            <button className="clear-btn" onClick={handleClearSearch}>
+              <X size={16} />
+            </button>
+          )}
+        </div>
 
 
         <div className={`search-dropdown ${isFocused ? 'open' : ''}`}>

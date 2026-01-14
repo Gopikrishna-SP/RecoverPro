@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
 import { Home, FileText, BarChart3, Settings, ChevronDown, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Sidebar({ collapsed, onToggle }) {
   const [expandedMenu, setExpandedMenu] = useState(null);
+  const navigate = useNavigate();
 
-  const toggleSidebar = () => setSidebarCollapsed(prev => !prev);
-
-  const handleMenuClick = (index) => {
+  const handleMenuClick = (index, defaultPath) => {
+    // Toggle expansion
     setExpandedMenu(expandedMenu === index ? null : index);
+    // Navigate to default path if menu has one
+    if (defaultPath) {
+      navigate(defaultPath);
+    }
   };
 
   const handleSignOut = () => {
     console.log('Sign out');
+    // Add actual sign out logic here
   };
 
   const handleSignOutClick = () => {
-    if (sidebarCollapsed) {
-      setSidebarCollapsed(false);
+    if (collapsed) {
+      onToggle();
       return;
     }
     handleSignOut();
@@ -26,22 +32,39 @@ export default function Sidebar({ collapsed, onToggle }) {
     {
       icon: Home,
       label: 'Home',
-      subItems: ['Dashboard', 'Create Account', 'Broadcast']
+      defaultPath: '/dashboard',
+      subItems: [
+        { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Create Account', path: '/dashboard/create-account' },
+        { label: 'Broadcast', path: '/dashboard/broadcast' }
+      ]
     },
     {
       icon: FileText,
       label: 'Loans',
-      subItems: ['Allocation', 'Assign Case', 'Upload']
+      defaultPath: '/loans/allocation',
+      subItems: [
+        { label: 'Allocation', path: '/loans/allocation' },
+        { label: 'Assign Case', path: '/loans/assign' },
+        { label: 'Upload', path: '/loans/upload' }
+      ]
     },
     {
       icon: BarChart3,
       label: 'Visits',
-      subItems: ['Visit Log', 'Start Visit']
+      defaultPath: '/visits/log',
+      subItems: [
+        { label: 'Visit Log', path: '/visits/log' },
+        { label: 'Start Visit', path: '/visits/start' }
+      ]
     },
     {
       icon: Settings,
       label: 'Settings',
-      subItems: ['Change Password']
+      defaultPath: '/settings/password',
+      subItems: [
+        { label: 'Change Password', path: '/settings/password' }
+      ]
     },
   ];
 
@@ -307,38 +330,14 @@ export default function Sidebar({ collapsed, onToggle }) {
               shapeRendering="geometricPrecision"
             >
               <defs>
-                <clipPath id="shieldClip">
-                  <path
-                    d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
-                c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
-                c-21.7,0-40.2-7.7-55.5-23l26.5-26.3
-                c-15.3-15.3-23-33.8-23-55.5s7.7-40.2,23-55.6
-                c15.3-15.3,33.8-23,55.5-23c21.6,0,40.1,7.7,55.5,23z"
-                  />
-                </clipPath>
-
-                {/* Inset shield clip (prevents bleed) */}
-                <clipPath id="shieldClipInset">
-                  <path
-                    d="M180.4,48.9l-24.5,24.5c14.2,14.2,21.4,31.6,21.4,51.1
-            c0,19.9-7.2,37.1-21.4,51.3c-14.2,14.2-31.6,21.4-51.1,21.4
-            c-19.9,0-37.1-7.2-51.3-21.4l24.5-24.3
-            c-14.2-14.2-21.4-31.6-21.4-51.3s7.2-37.1,21.4-51.3
-            c14.2-14.2,31.6-21.4,51.3-21.4c19.7,0,37.1,7.2,51.1,21.4z"
-                  />
-                </clipPath>
-
-
                 <clipPath id="diagBlue">
                   <polygon points="0,0 229,0 0,229" />
                 </clipPath>
-
                 <clipPath id="diagTeal">
                   <polygon points="229,0 229,229 0,229" />
                 </clipPath>
               </defs>
 
-              {/* BLUE HALF */}
               <path
                 d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
             c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
@@ -349,7 +348,6 @@ export default function Sidebar({ collapsed, onToggle }) {
                 fill="#2563EB"
               />
 
-              {/* TEAL HALF */}
               <path
                 d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
             c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
@@ -380,7 +378,7 @@ export default function Sidebar({ collapsed, onToggle }) {
             <div key={index}>
               <div
                 className={`menu-item ${expandedMenu === index ? 'active expanded' : ''}`}
-                onClick={() => handleMenuClick(index)}
+                onClick={() => handleMenuClick(index, item.defaultPath)}
               >
                 <div className="menu-item-left">
                   <div className="menu-item-icon">
@@ -394,8 +392,12 @@ export default function Sidebar({ collapsed, onToggle }) {
               </div>
               <div className={`submenu ${expandedMenu === index ? 'open' : ''}`}>
                 {item.subItems.map((subItem, subIndex) => (
-                  <div key={subIndex} className="submenu-item">
-                    {subItem}
+                  <div
+                    key={subIndex}
+                    className="submenu-item"
+                    onClick={() => navigate(subItem.path)}
+                  >
+                    {subItem.label}
                   </div>
                 ))}
               </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Building2, Landmark, Bell, BarChart3, Plus } from 'lucide-react';
 
 const styles = `
@@ -365,9 +365,12 @@ const styles = `
   }
 `;
 
-export default function SuperAdminDashboard() {
-  const [activeTab, setActiveTab] = useState('overview');
+export default function SuperAdminDashboard({ defaultTab = 'overview' }) {
+  const [activeTab, setActiveTab] = useState(defaultTab);
 
+  useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
   return (
     <>
       <style>{styles}</style>
