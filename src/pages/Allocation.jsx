@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Search, Download, Eye, Edit, Trash2 } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Search, Download, Eye, Edit, Trash2, Upload } from 'lucide-react';
 
 const styles = `
   * {
@@ -80,7 +80,12 @@ const styles = `
     background: rgba(30, 41, 59, 0.8);
   }
 
-  .export-btn {
+  .btn-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .export-btn, .upload-btn {
     padding: 10px 16px;
     background: rgba(30, 41, 59, 0.5);
     border: 1px solid rgba(71, 85, 105, 0.3);
@@ -95,10 +100,19 @@ const styles = `
     gap: 6px;
   }
 
-  .export-btn:hover {
+  .export-btn:hover, .upload-btn:hover {
     border-color: rgba(59, 130, 246, 0.5);
     background: rgba(30, 41, 59, 0.8);
     color: #e2e8f0;
+  }
+
+  .upload-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .file-input {
+    display: none;
   }
 
   .stats-bar {
@@ -121,6 +135,42 @@ const styles = `
 
   .stat-info strong {
     color: #e2e8f0;
+  }
+
+  .status-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .status-message.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10b981;
+  }
+
+  .status-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+  }
+
+  .status-message.loading {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 18px;
   }
 
   .table-wrapper {
@@ -279,138 +329,151 @@ const styles = `
 `;
 
 const ALL_COLUMNS = [
-  'segment', 'product', 'zone', 'state', 'branch', 'location', 'loanNumber', 'customerName',
-  'disburseAmount', 'disburseDate', 'pos', 'posAmount', 'emi', 'emiStartDate', 'emiEndDate',
-  'bktTag', 'openingBucket', 'ashvDaPtc', 'securitization', 'seInse', 'agencyCode', 'agency',
-  'managerEmpId', 'manager', 'zmEmpId', 'zonalManager', 'mainApplicantMobileNo', 'mainApplicantName',
-  'coApplicant1Name', 'coApplicant1MobileNo', 'relationWithMainApplicant', 'addressPriority1',
-  'addressPriority2', 'addressPriority3', 'addressPriority4', 'addressPriority5', 'addressPriority6',
-  'addressPriority7', 'addressPriority8', 'businessPinCode', 'residencePinCode', 'mainPinCode',
-  'panMainApp', 'dobMainApp', 'panCoApp', 'dobCoApp', 'address1', 'address2', 'address3', 'address4',
-  'address5', 'address6', 'address7', 'address8', 'address9', 'address10', 'phone1', 'phone2', 'phone3',
-  'phone4', 'phone5', 'phone6', 'phone7', 'phone8', 'phone9', 'phone10', 'monthLastNotice', 'lrn1',
-  'lrnMonth2', 'lrn2', 'lrnMonth3', 'lrn3', 'revisedStageArbitration', 'advocateOnRecord',
-  'arbitrationInvocationDate1', 'arbitrationInvocationDate2', 'tentativeDateIssueReference',
-  'letterToArbitrator', 'tentativeDateFreezingOrders', 'sec17OrderDate', 'relief', 'nodh',
-  'monthOfNotice', 'noticeDate', 'dateFilingConfirmation', 'sec25Filed', 'sec25ProcessStage',
-  'sec25Ldoh', 'sec25Ndoh', 'listingDate', 'dateOfFiling', 'courtForum', 'caseNumber', 'advocateName',
-  'advocateContactNumber', 'authorizedOfficer', 'stage1Verification', 'stage1HearingOn',
-  'stage2SummonsStage', 'stage2SummonsIssued', 'stage2SummonsCollected', 'stage3Appearance',
-  'stage3HearingOn', 'stage4BailableWarrantIssuedDate', 'stage4BailableWarrantIssued',
-  'stage4BailableWarrantCollected', 'stage6NonBailableWarrantIssued', 'stage6NonBailableWarrantCollected',
-  'nonBailableWarrantReIssuedDate', 'nonBailableWarrantReIssueCollxDate', 'twoNdNonBailableWarrantReIssuedDate',
-  'twoNdNonBailableWarrantReIssueCollxDate', 'thirdNonBailableWarrantReIssuedDate', 'thirdNonBailableWarrantReIssueCollxDate',
-  'fourthNonBailableWarrantReIssuedDate', 'fourthNonBailableWarrantReIssueCollxDate', 'fifthNonBailableWarrantReIssuedDate',
-  'fifthNonBailableWarrantReIssueCollxDate', 'sec138Filed', 'sec138ProcessStage', 'sec138Ldoh', 'sec138Ndoh',
-  'sec138ListingDate', 'sec138DateOfFiling', 'sec138CourtForum', 'sec138LocationFilling', 'sec138CaseNumber',
-  'sec420ProcessStage', 'caseWithdrawalDate', 'sec420Ldoh', 'sec420Ndoh', 'sec420ListingDate', 'sec420Remarks',
-  'sec420DateOfFiling', 'sec420CourtForum', 'sec420CaseNumber', 'claimAmount', 'sec420AdvocateName',
-  'sec420AdvocateContactNumber', 'sec420AuthorizedOfficer', 'sec420Stage1Verification', 'sec420Stage1HearingOn',
-  'sec420Stage2Summons', 'sec420Stage2SummonsCollected', 'sec420Stage3Appearance', 'sec420Stage3HearingOn',
-  'sec420Stage4BailableWarrantIssuedDate', 'sec420Stage4BailableWarrantIssued', 'sec420Stage4BailableWarrantCollected',
-  'sec420Stage5NonBailableWarrantIssuedDate', 'bwReIssuedDate', 'bwWarrantPostDate', 'bwReIssuedCollectionDate',
-  'sec420Stage5NonBailableWarrantIssued', 'sec420Stage5NonBailableWarrantCollected', 'stage6NonBailableWarrantReIssuedDate',
-  'stage6NonBailableWarrantReIssued', 'stage7NonBailableWarrantReIssuedDate', 'stage7NonBailableWarrantReIssued',
-  'stage8NonBailableWarrantReIssuedDate', 'stage8NonBailableWarrantReIssued', 'stage5NonBailableWarrantRecollected',
-  'stage5ProclamationIssuedDate', 'stage5ProclamationIssued', 'stage5ProclamationCollected',
-  'stage5AttachmentPropertyIssuedDate', 'stage5AttachmentPropertyIssued', 'stage5AttachmentPropertyCollected',
-  'accountHolder1', 'bankName1', 'accountNumber1', 'ifscCode1', 'accountHolder2', 'bankName2',
-  'accountNumber2', 'ifscCode2', 'accountHolder3', 'bankName3', 'accountNumber3', 'ifscCode3'
+  'SEGMENT', 'PRODUCT', 'ZONE', 'STATE', 'BRANCH', 'LOCATION', 'LOANNUMBER', 'CUSTOMER NAME',
+  'DISBURSED AMOUNT (IN CR)', 'DISBURSED DATE', 'POS (IN CR)', 'POS Amt', 'EMI', 'EMI START DATE', 'EMI END DATE',
+  'BKT TAG', 'OPENING BKT', 'ASHV DA/PTC', 'SECURITIZATION', 'SE/INSE', 'AGENCY CODE', 'AGENCY',
+  'MANAGER EMP ID', 'MANAGER', 'ZM EMP ID', 'ZONAL MANAGER', 'Main_Applicant_Mobile_No', 'Main_applicant_Name',
+  'Co_Applicant1_Name', 'Co_Applicant1_Mobile_No', 'Relation_with_Main_Applicant', 'address_priority_1',
+  'address_priority_2', 'address_priority_3', 'address_priority_4', 'address_priority_5', 'address_priority_6',
+  'address_priority_7', 'address_priority_8', 'business_pin_code', 'residence_pin_code', 'main_pincode',
+  'pan_main_app', 'dob_main_app', 'pan_co_app', 'dob_co_app', 'address_1', 'address_2', 'address_3', 'address_4',
+  'address_5', 'address_6', 'address_7', 'address_8', 'address_9', 'address_10', 'phone_1', 'phone_2', 'phone_3',
+  'phone_4', 'phone_5', 'phone_6', 'phone_7', 'phone_8', 'phone_9', 'phone_10', 'MONTH - LAST NOTICE', 'LRN 1',
+  'LRN MONTH 2', 'LRN 2', 'LRN MONTH 3', 'LRN 3', 'REVISED STAGE IN ARBITRATION (20.11.2025)', 'ADVOCATE ON RECORD (20.11.2025)',
+  'ARBITRATION INVOKATION DATE  1   (20.11.2025)', 'ARBITRATION INVOKATION DATE  2  (20.11.2025)', 'TENTATIVE DATE TO ISSUE REFERENCE (20.11.2025)',
+  'LETTER TO ARBITRATOR (20.11.2025)', 'TENTATIVE DATE FOR FREEZING AND OTHER ORDERS (20.11.2025)', 'RELIEF (20.11.2025)', 'NODH',
+  'MONTH OF NOTICE', 'NOTICE DATE', 'Date of Filling Confrmation', 'SEC 25- FILED/NOT FILED', 'SEC 25 -  PROCESS STAGE',
+  'SEC 25 -  LDOH', 'SEC 25 -  NDOH', 'LISTING DATE', 'DATE OF FILING', 'COURT/FORUM', 'Case Number', 'ADVOCATE NAME',
+  'ADVOCATE\'S CONTACT NUMBER', 'AUTHORIZED OFFICER', 'STAGE 1 - FOR VERIFICATION', 'STAGE 1 - HEARING ON',
+  'STAGE 2 - SUMMONS STAGE', 'STAGE 2 - SUMMONS COLLECTED/ NOT COLLECTED/ DISPATCHED/ NOT DISPATCHED', 'STAGE 3 - APPERANCE/ NON APPEARANCE',
+  'STAGE 3 - HEARING ON', 'STAGE 4 - BAILABLE WARRANT ISSUED DATE', 'STAGE 4 - BAILABLE WARRANT COLLECTED/ NOT COLLECTED/ DISPATCHED/ NOT DISPATCHED',
+  'LOCATION FILLING', 'CASE NUMBER', 'Case Withdrawal Date', 'REMARKS', 'CLAIM AMOUNT', 'BW RE ISSUED DATE', 'BW RE ISSUED COLLECTION DATE',
+  'STAGE 5 - NON BAILABLE WARRANT ISSUED DATE', 'STAGE 5 - NON BAILABLE WARRANT COLLECTED/ NOT COLLECTED/ DISPATCHED/ NOT DISPATCHED',
+  'STAGE 6 - NON BAILABLE WARRANT REISSUED DATE', 'STAGE 7 - NON BAILABLE WARRANT REISSUED DATE', 'STAGE 8 - NON BAILABLE WARRANT REISSUED DATE',
+  'STAGE 5 - PROCLAMATION ISSUED DATE', 'STAGE 5 - PROCLAMATION ISSUED/ COLLECTED/ DISPATCHED', 'STAGE 5 - PROCLAMATION COLLECTED / NOT COLLECTED',
+  'STAGE 5 - ATTACHMENT OF PROPERTY COLLECTED/ NOT COLLECTED',
+  'Account Holder 1', 'BANK NAME 1', 'ACCOUNT NUMBER 1', 'IFSC CODE 1', 'Account Holder 2', 'BANK NAME 2',
+  'ACCOUNT NUMBER 2', 'IFSC CODE 2', 'Account Holder 3', 'BANK NAME 3', 'ACCOUNT NUMBER 3', 'IFSC CODE 3'
 ];
 
-const dummyData = [
-  {
-    segment: 'EEG', product: 'Business Loan', zone: 'Zone 1', state: 'Karnataka', branch: 'Bangalore',
-    location: 'BANGALORE', loanNumber: 'GS015EEB1426578', customerName: 'MEDICENE POINT',
-    disburseAmount: 500000, disburseDate: '2023-01-15', pos: 0.0047217, posAmount: 47217, emi: 24819,
-    emiStartDate: '2023-02-15', emiEndDate: '2028-02-15', bktTag: 'BKT 3-6', openingBucket: 'BKT 3',
-    ashvDaPtc: '-', securitization: 'IDFC Bank', seInse: 'SE', agencyCode: 'AGY001', agency: 'Agency A',
-    managerEmpId: 'MGR001', manager: 'John Smith', zmEmpId: 'ZM001', zonalManager: 'Ram Kumar',
-    mainApplicantMobileNo: '9620171383', mainApplicantName: 'Rajesh Kumar', coApplicant1Name: 'Priya Sharma',
-    coApplicant1MobileNo: '9876543210', relationWithMainApplicant: 'Spouse', addressPriority1: '123 Main Street',
-    addressPriority2: '456 Secondary Lane', addressPriority3: 'Wing A', addressPriority4: 'Bangalore', addressPriority5: 'Karnataka', addressPriority6: '560001', addressPriority7: 'India', addressPriority8: '-',
-    businessPinCode: '560001', residencePinCode: '560002', mainPinCode: '560001', panMainApp: 'ABCD1234E', dobMainApp: '1985-05-20',
-    panCoApp: 'XYZP9876Q', dobCoApp: '1988-08-15', address1: '123 Main Street', address2: '456 Secondary', address3: 'Wing A', address4: 'Block 1', address5: 'Bangalore', address6: 'Karnataka', address7: 'India', address8: '560001', address9: '-', address10: '-',
-    phone1: '9620171383', phone2: '9876543210', phone3: '-', phone4: '-', phone5: '-', phone6: '-', phone7: '-', phone8: '-', phone9: '-', phone10: '-',
-    monthLastNotice: '2023-06', lrn1: 'LRN001', lrnMonth2: '2023-07', lrn2: 'LRN002', lrnMonth3: '2023-08', lrn3: 'LRN003',
-    revisedStageArbitration: 'Stage 2', advocateOnRecord: 'ARV001', arbitrationInvocationDate1: '2023-09-10', arbitrationInvocationDate2: '2023-10-15', tentativeDateIssueReference: '2023-11-20', letterToArbitrator: '2023-12-01', tentativeDateFreezingOrders: '2024-01-15', sec17OrderDate: '2024-02-10', relief: '500000', nodh: '2024-03-01',
-    monthOfNotice: '2024-04', noticeDate: '2024-04-15', dateFilingConfirmation: '2024-04-20', sec25Filed: 'Yes', sec25ProcessStage: 'Filed', sec25Ldoh: '2024-05-01', sec25Ndoh: '2024-06-01', listingDate: '2024-06-15', dateOfFiling: '2024-06-20', courtForum: 'District Court', caseNumber: 'DC/2024/001', advocateName: 'Ashish Verma', advocateContactNumber: '9988776655', authorizedOfficer: 'AO001',
-    stage1Verification: 'Completed', stage1HearingOn: '2024-07-01', stage2SummonsStage: 'Issued', stage2SummonsIssued: '2024-07-10', stage2SummonsCollected: '2024-07-15', stage3Appearance: 'Yes', stage3HearingOn: '2024-08-01', stage4BailableWarrantIssuedDate: '2024-08-15', stage4BailableWarrantIssued: 'Issued', stage4BailableWarrantCollected: '2024-08-20', stage6NonBailableWarrantIssued: 'Pending', stage6NonBailableWarrantCollected: '-',
-    nonBailableWarrantReIssuedDate: '-', nonBailableWarrantReIssueCollxDate: '-', twoNdNonBailableWarrantReIssuedDate: '-', twoNdNonBailableWarrantReIssueCollxDate: '-', thirdNonBailableWarrantReIssuedDate: '-', thirdNonBailableWarrantReIssueCollxDate: '-', fourthNonBailableWarrantReIssuedDate: '-', fourthNonBailableWarrantReIssueCollxDate: '-', fifthNonBailableWarrantReIssuedDate: '-', fifthNonBailableWarrantReIssueCollxDate: '-',
-    sec138Filed: 'Yes', sec138ProcessStage: 'Filed', sec138Ldoh: '2024-09-01', sec138Ndoh: '2024-10-01', sec138ListingDate: '2024-10-15', sec138DateOfFiling: '2024-10-20', sec138CourtForum: 'District Court', sec138LocationFilling: 'Bangalore', sec138CaseNumber: 'SEC138/2024/001',
-    sec420ProcessStage: 'Filed', caseWithdrawalDate: '-', sec420Ldoh: '2024-11-01', sec420Ndoh: '2024-12-01', sec420ListingDate: '2024-12-15', sec420Remarks: 'Case pending', sec420DateOfFiling: '2024-12-20', sec420CourtForum: 'District Court', sec420CaseNumber: 'SEC420/2024/001', claimAmount: 500000, sec420AdvocateName: 'Ashish Verma', sec420AdvocateContactNumber: '9988776655', sec420AuthorizedOfficer: 'AO001',
-    sec420Stage1Verification: 'Completed', sec420Stage1HearingOn: '2025-01-10', sec420Stage2Summons: 'Issued', sec420Stage2SummonsCollected: '2025-01-15', sec420Stage3Appearance: 'Yes', sec420Stage3HearingOn: '2025-02-01', sec420Stage4BailableWarrantIssuedDate: '2025-02-15', sec420Stage4BailableWarrantIssued: 'Issued', sec420Stage4BailableWarrantCollected: '2025-02-20', sec420Stage5NonBailableWarrantIssuedDate: '-', bwReIssuedDate: '-', bwWarrantPostDate: '-', bwReIssuedCollectionDate: '-',
-    sec420Stage5NonBailableWarrantIssued: '-', sec420Stage5NonBailableWarrantCollected: '-', stage6NonBailableWarrantReIssuedDate: '-', stage6NonBailableWarrantReIssued: '-', stage7NonBailableWarrantReIssuedDate: '-', stage7NonBailableWarrantReIssued: '-', stage8NonBailableWarrantReIssuedDate: '-', stage8NonBailableWarrantReIssued: '-', stage5NonBailableWarrantRecollected: '-', stage5ProclamationIssuedDate: '-', stage5ProclamationIssued: '-', stage5ProclamationCollected: '-',
-    stage5AttachmentPropertyIssuedDate: '-', stage5AttachmentPropertyIssued: '-', stage5AttachmentPropertyCollected: '-',
-    accountHolder1: 'Rajesh Kumar', bankName1: 'HDFC Bank', accountNumber1: '1234567890123', ifscCode1: 'HDFC0000123', accountHolder2: 'Priya Sharma', bankName2: 'ICICI Bank', accountNumber2: '9876543210987', ifscCode2: 'ICIC0000456', accountHolder3: '-', bankName3: '-', accountNumber3: '-', ifscCode3: '-'
-  },
-  {
-    segment: 'EEG', product: 'Business Loan', zone: 'Zone 2', state: 'Karnataka', branch: 'Mysuru',
-    location: 'MYSURU', loanNumber: 'GS020EEB2413307', customerName: 'SKANDA GARMENTS',
-    disburseAmount: 750000, disburseDate: '2023-02-10', pos: 0.0065441, posAmount: 65441, emi: 35250,
-    emiStartDate: '2023-03-10', emiEndDate: '2028-03-10', bktTag: 'BKT 0-30', openingBucket: 'BKT 0',
-    ashvDaPtc: '-', securitization: 'HDFC Bank', seInse: 'SE', agencyCode: 'AGY002', agency: 'Agency B',
-    managerEmpId: 'MGR002', manager: 'Priya Singh', zmEmpId: 'ZM002', zonalManager: 'Ashok Patel',
-    mainApplicantMobileNo: '9876543210', mainApplicantName: 'Suresh Desai', coApplicant1Name: 'Anjali Desai',
-    coApplicant1MobileNo: '9123456789', relationWithMainApplicant: 'Spouse', addressPriority1: '789 Complex',
-    addressPriority2: '321 Business', addressPriority3: 'Suite 5', addressPriority4: 'Mysuru', addressPriority5: 'Karnataka', addressPriority6: '570001', addressPriority7: 'India', addressPriority8: '-',
-    businessPinCode: '570001', residencePinCode: '570002', mainPinCode: '570001', panMainApp: 'EFGH5678I', dobMainApp: '1982-03-10', panCoApp: 'MNOP2345R', dobCoApp: '1985-06-22',
-    address1: '789 Complex', address2: '321 Business', address3: 'Suite 5', address4: 'Block 2', address5: 'Mysuru', address6: 'Karnataka', address7: 'India', address8: '570001', address9: '-', address10: '-',
-    phone1: '9876543210', phone2: '9123456789', phone3: '-', phone4: '-', phone5: '-', phone6: '-', phone7: '-', phone8: '-', phone9: '-', phone10: '-',
-    monthLastNotice: '2023-07', lrn1: 'LRN004', lrnMonth2: '2023-08', lrn2: 'LRN005', lrnMonth3: '2023-09', lrn3: 'LRN006',
-    revisedStageArbitration: 'Stage 1', advocateOnRecord: 'ARV002', arbitrationInvocationDate1: '2023-10-20', arbitrationInvocationDate2: '2023-11-25', tentativeDateIssueReference: '2023-12-30', letterToArbitrator: '2024-01-10', tentativeDateFreezingOrders: '2024-02-20', sec17OrderDate: '2024-03-15', relief: '750000', nodh: '2024-04-10',
-    monthOfNotice: '2024-05', noticeDate: '2024-05-20', dateFilingConfirmation: '2024-05-25', sec25Filed: 'Yes', sec25ProcessStage: 'In Progress', sec25Ldoh: '2024-06-05', sec25Ndoh: '2024-07-05', listingDate: '2024-07-20', dateOfFiling: '2024-07-25', courtForum: 'District Court', caseNumber: 'DC/2024/002', advocateName: 'Priya Nair', advocateContactNumber: '9765432101', authorizedOfficer: 'AO002',
-    stage1Verification: 'In Progress', stage1HearingOn: '2024-08-10', stage2SummonsStage: 'Pending', stage2SummonsIssued: '-', stage2SummonsCollected: '-', stage3Appearance: 'Pending', stage3HearingOn: '-', stage4BailableWarrantIssuedDate: '-', stage4BailableWarrantIssued: '-', stage4BailableWarrantCollected: '-', stage6NonBailableWarrantIssued: '-', stage6NonBailableWarrantCollected: '-',
-    nonBailableWarrantReIssuedDate: '-', nonBailableWarrantReIssueCollxDate: '-', twoNdNonBailableWarrantReIssuedDate: '-', twoNdNonBailableWarrantReIssueCollxDate: '-', thirdNonBailableWarrantReIssuedDate: '-', thirdNonBailableWarrantReIssueCollxDate: '-', fourthNonBailableWarrantReIssuedDate: '-', fourthNonBailableWarrantReIssueCollxDate: '-', fifthNonBailableWarrantReIssuedDate: '-', fifthNonBailableWarrantReIssueCollxDate: '-',
-    sec138Filed: 'No', sec138ProcessStage: 'Not Filed', sec138Ldoh: '-', sec138Ndoh: '-', sec138ListingDate: '-', sec138DateOfFiling: '-', sec138CourtForum: '-', sec138LocationFilling: '-', sec138CaseNumber: '-',
-    sec420ProcessStage: 'Not Filed', caseWithdrawalDate: '-', sec420Ldoh: '-', sec420Ndoh: '-', sec420ListingDate: '-', sec420Remarks: 'Awaiting action', sec420DateOfFiling: '-', sec420CourtForum: '-', sec420CaseNumber: '-', claimAmount: 750000, sec420AdvocateName: '-', sec420AdvocateContactNumber: '-', sec420AuthorizedOfficer: '-',
-    sec420Stage1Verification: '-', sec420Stage1HearingOn: '-', sec420Stage2Summons: '-', sec420Stage2SummonsCollected: '-', sec420Stage3Appearance: '-', sec420Stage3HearingOn: '-', sec420Stage4BailableWarrantIssuedDate: '-', sec420Stage4BailableWarrantIssued: '-', sec420Stage4BailableWarrantCollected: '-', sec420Stage5NonBailableWarrantIssuedDate: '-', bwReIssuedDate: '-', bwWarrantPostDate: '-', bwReIssuedCollectionDate: '-',
-    sec420Stage5NonBailableWarrantIssued: '-', sec420Stage5NonBailableWarrantCollected: '-', stage6NonBailableWarrantReIssuedDate: '-', stage6NonBailableWarrantReIssued: '-', stage7NonBailableWarrantReIssuedDate: '-', stage7NonBailableWarrantReIssued: '-', stage8NonBailableWarrantReIssuedDate: '-', stage8NonBailableWarrantReIssued: '-', stage5NonBailableWarrantRecollected: '-', stage5ProclamationIssuedDate: '-', stage5ProclamationIssued: '-', stage5ProclamationCollected: '-',
-    stage5AttachmentPropertyIssuedDate: '-', stage5AttachmentPropertyIssued: '-', stage5AttachmentPropertyCollected: '-',
-    accountHolder1: 'Suresh Desai', bankName1: 'ICICI Bank', accountNumber1: '4567891234567', ifscCode1: 'ICIC0000789', accountHolder2: 'Anjali Desai', bankName2: 'Axis Bank', accountNumber2: '7891234567890', ifscCode2: 'UTIB0000234', accountHolder3: '-', bankName3: '-', accountNumber3: '-', ifscCode3: '-'
-  },
-  {
-    segment: 'SME', product: 'Trade Loan', zone: 'Zone 3', state: 'Maharashtra', branch: 'Pune',
-    location: 'PUNE', loanNumber: 'GS025SME3156890', customerName: 'TECH SOLUTIONS',
-    disburseAmount: 1200000, disburseDate: '2023-03-05', pos: 0.008975, posAmount: 89750, emi: 54320,
-    emiStartDate: '2023-04-05', emiEndDate: '2028-04-05', bktTag: 'BKT 6-9', openingBucket: 'BKT 6',
-    ashvDaPtc: 'ASHV-12', securitization: 'Kotak Mahindra', seInse: 'INSE', agencyCode: 'AGY003', agency: 'Agency C',
-    managerEmpId: 'MGR003', manager: 'Vikram Reddy', zmEmpId: 'ZM003', zonalManager: 'Neha Gupta',
-    mainApplicantMobileNo: '9654321098', mainApplicantName: 'Anil Sharma', coApplicant1Name: 'Divya Sharma',
-    coApplicant1MobileNo: '9234567890', relationWithMainApplicant: 'Partner', addressPriority1: '201 Tech Park',
-    addressPriority2: '456 Industrial', addressPriority3: 'Phase 2', addressPriority4: 'Pune', addressPriority5: 'Maharashtra', addressPriority6: '411001', addressPriority7: 'India', addressPriority8: '-',
-    businessPinCode: '411001', residencePinCode: '411003', mainPinCode: '411001', panMainApp: 'IJKL9012M', dobMainApp: '1980-07-25', panCoApp: 'QRST3456S', dobCoApp: '1983-09-14',
-    address1: '201 Tech Park', address2: '456 Industrial Zone', address3: 'Phase 2', address4: 'Building C', address5: 'Pune', address6: 'Maharashtra', address7: 'India', address8: '411001', address9: '-', address10: '-',
-    phone1: '9654321098', phone2: '9234567890', phone3: '-', phone4: '-', phone5: '-', phone6: '-', phone7: '-', phone8: '-', phone9: '-', phone10: '-',
-    monthLastNotice: '2024-01', lrn1: 'LRN007', lrnMonth2: '2024-02', lrn2: 'LRN008', lrnMonth3: '2024-03', lrn3: 'LRN009',
-    revisedStageArbitration: 'Stage 3', advocateOnRecord: 'ARV003', arbitrationInvocationDate1: '2024-04-15', arbitrationInvocationDate2: '2024-05-20', tentativeDateIssueReference: '2024-06-25', letterToArbitrator: '2024-07-05', tentativeDateFreezingOrders: '2024-08-15', sec17OrderDate: '2024-09-10', relief: '1200000', nodh: '2024-10-01',
-    monthOfNotice: '2024-11', noticeDate: '2024-11-15', dateFilingConfirmation: '2024-11-20', sec25Filed: 'Yes', sec25ProcessStage: 'Under Review', sec25Ldoh: '2024-12-01', sec25Ndoh: '2025-01-01', listingDate: '2025-01-15', dateOfFiling: '2025-01-20', courtForum: 'High Court', caseNumber: 'HC/2025/001', advocateName: 'Rajesh Kumar', advocateContactNumber: '9654321098', authorizedOfficer: 'AO003',
-    stage1Verification: 'Completed', stage1HearingOn: '2025-02-10', stage2SummonsStage: 'Issued', stage2SummonsIssued: '2025-02-20', stage2SummonsCollected: '2025-02-25', stage3Appearance: 'Yes', stage3HearingOn: '2025-03-15', stage4BailableWarrantIssuedDate: '2025-04-01', stage4BailableWarrantIssued: 'Issued', stage4BailableWarrantCollected: '2025-04-05', stage6NonBailableWarrantIssued: 'Issued', stage6NonBailableWarrantCollected: '2025-04-10',
-    nonBailableWarrantReIssuedDate: '2025-05-01', nonBailableWarrantReIssueCollxDate: '2025-05-05', twoNdNonBailableWarrantReIssuedDate: '-', twoNdNonBailableWarrantReIssueCollxDate: '-', thirdNonBailableWarrantReIssuedDate: '-', thirdNonBailableWarrantReIssueCollxDate: '-', fourthNonBailableWarrantReIssuedDate: '-', fourthNonBailableWarrantReIssueCollxDate: '-', fifthNonBailableWarrantReIssuedDate: '-', fifthNonBailableWarrantReIssueCollxDate: '-',
-    sec138Filed: 'Yes', sec138ProcessStage: 'In Progress', sec138Ldoh: '2025-05-15', sec138Ndoh: '2025-06-15', sec138ListingDate: '2025-06-30', sec138DateOfFiling: '2025-07-05', sec138CourtForum: 'District Court', sec138LocationFilling: 'Pune', sec138CaseNumber: 'SEC138/2025/001',
-    sec420ProcessStage: 'Filed', caseWithdrawalDate: '-', sec420Ldoh: '2025-07-20', sec420Ndoh: '2025-08-20', sec420ListingDate: '2025-09-05', sec420Remarks: 'Under consideration', sec420DateOfFiling: '2025-09-10', sec420CourtForum: 'High Court', sec420CaseNumber: 'SEC420/2025/001', claimAmount: 1200000, sec420AdvocateName: 'Rajesh Kumar', sec420AdvocateContactNumber: '9654321098', sec420AuthorizedOfficer: 'AO003',
-    sec420Stage1Verification: 'Completed', sec420Stage1HearingOn: '2025-09-25', sec420Stage2Summons: 'Issued', sec420Stage2SummonsCollected: '2025-10-01', sec420Stage3Appearance: 'Yes', sec420Stage3HearingOn: '2025-10-15', sec420Stage4BailableWarrantIssuedDate: '2025-11-01', sec420Stage4BailableWarrantIssued: 'Issued', sec420Stage4BailableWarrantCollected: '2025-11-05', sec420Stage5NonBailableWarrantIssuedDate: '-', bwReIssuedDate: '-', bwWarrantPostDate: '-', bwReIssuedCollectionDate: '-',
-    sec420Stage5NonBailableWarrantIssued: '-', sec420Stage5NonBailableWarrantCollected: '-', stage6NonBailableWarrantReIssuedDate: '-', stage6NonBailableWarrantReIssued: '-', stage7NonBailableWarrantReIssuedDate: '-', stage7NonBailableWarrantReIssued: '-', stage8NonBailableWarrantReIssuedDate: '-', stage8NonBailableWarrantReIssued: '-', stage5NonBailableWarrantRecollected: '-', stage5ProclamationIssuedDate: '-', stage5ProclamationIssued: '-', stage5ProclamationCollected: '-',
-    stage5AttachmentPropertyIssuedDate: '-', stage5AttachmentPropertyIssued: '-', stage5AttachmentPropertyCollected: '-',
-    accountHolder1: 'Anil Sharma', bankName1: 'Kotak Mahindra', accountNumber1: '1357924680135', ifscCode1: 'KKBK0000001', accountHolder2: 'Divya Sharma', bankName2: 'SBI', accountNumber2: '2468135792468', ifscCode2: 'SBIN0000567', accountHolder3: '-', bankName3: '-', accountNumber3: '-', ifscCode3: '-'
-  }
-];
+// API Configuration
+const API_BASE_URL = 'http://localhost:8080/api';
 
 export default function AllocationsList() {
+  const [allocations, setAllocations] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [status, setStatus] = useState(null);
+  const fileInputRef = useState(null)[1];
   const itemsPerPage = 10;
 
+  // Fetch allocations on component mount
+  useEffect(() => {
+    fetchAllocations();
+  }, []);
+
+  const fetchAllocations = async () => {
+    setLoading(true);
+    setStatus(null);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setStatus({ type: 'error', message: 'Authentication token not found. Please login again.' });
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/allocations`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        setStatus({ type: 'error', message: 'Session expired. Please login again.' });
+        return;
+      }
+
+      if (!response.ok) throw new Error('Failed to fetch allocations');
+      const data = await response.json();
+      
+      // Flatten the allocationData structure
+      const flattenedData = data.map(item => ({
+        id: item.id,
+        loanNumber: item.loanNumber,
+        fieldExecutiveId: item.fieldExecutiveId,
+        status: item.status,
+        assignedAt: item.assignedAt,
+        lastVisitedAt: item.lastVisitedAt,
+        visitCount: item.visitCount,
+        ...item.allocationData, // Spread all allocation data properties at root level
+      }));
+      
+      setAllocations(flattenedData);
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Failed to load allocations: ' + err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    setStatus(null);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token not found. Please login again.');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/allocations/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        throw new Error('Session expired. Please login again.');
+      }
+
+      if (!response.ok) throw new Error('Upload failed');
+      const data = await response.json();
+      setStatus({
+        type: 'success',
+        message: `${data.recordsInserted} records inserted successfully`,
+      });
+      await fetchAllocations();
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Upload failed: ' + err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredData = useMemo(() => {
-    if (!searchTerm) return dummyData;
+    if (!searchTerm) return allocations;
     const search = searchTerm.toLowerCase();
-    return dummyData.filter(item =>
-      item.loanNumber.toLowerCase().includes(search) ||
-      item.customerName.toLowerCase().includes(search) ||
-      item.mainApplicantMobileNo.includes(search) ||
-      item.mainApplicantName.toLowerCase().includes(search)
+    return allocations.filter(item =>
+      (item.LOANNUMBER?.toLowerCase().includes(search)) ||
+      (item['CUSTOMER NAME']?.toLowerCase().includes(search)) ||
+      (item.Main_Applicant_Mobile_No?.toString().includes(search)) ||
+      (item.Main_applicant_Name?.toLowerCase().includes(search))
     );
-  }, [searchTerm]);
+  }, [searchTerm, allocations]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
@@ -442,6 +505,18 @@ export default function AllocationsList() {
           <p>View all loan allocations with 150+ fields</p>
         </div>
 
+        {status && (
+          <div className={`status-message ${status.type}`}>
+            <span>{status.message}</span>
+            <button
+              className="close-btn"
+              onClick={() => setStatus(null)}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         <div className="controls">
           <div className="search-box">
             <Search className="search-icon" size={16} />
@@ -456,9 +531,26 @@ export default function AllocationsList() {
               }}
             />
           </div>
-          <button className="export-btn" onClick={handleExport}>
-            <Download size={14} /> Export CSV
-          </button>
+          <div className="btn-group">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              className="file-input"
+              onChange={handleFileUpload}
+              disabled={loading}
+            />
+            <button
+              className="upload-btn"
+              onClick={() => fileInputRef?.click?.()}
+              disabled={loading}
+            >
+              <Upload size={14} /> Upload Excel
+            </button>
+            <button className="export-btn" onClick={handleExport}>
+              <Download size={14} /> Export CSV
+            </button>
+          </div>
         </div>
 
         <div className="stats-bar">
@@ -472,7 +564,11 @@ export default function AllocationsList() {
 
         <div className="table-wrapper">
           <div className="table-container">
-            {paginatedData.length > 0 ? (
+            {loading ? (
+              <div className="empty-state">
+                <h3>Loading allocations...</h3>
+              </div>
+            ) : paginatedData.length > 0 ? (
               <table>
                 <thead>
                   <tr>
@@ -484,10 +580,10 @@ export default function AllocationsList() {
                 </thead>
                 <tbody>
                   {paginatedData.map((row, idx) => (
-                    <tr key={idx}>
+                    <tr key={row.id || idx}>
                       {ALL_COLUMNS.map(col => (
                         <td key={`${idx}-${col}`} title={row[col] || '-'}>
-                          {col.includes('Amount') || col.includes('Emi') 
+                          {col.includes('Amount') || col.includes('Emi')
                             ? <span className="currency">₹{row[col]?.toLocaleString() || '-'}</span>
                             : col.includes('Date')
                             ? <span className="date">{row[col] || '-'}</span>
@@ -514,7 +610,7 @@ export default function AllocationsList() {
             ) : (
               <div className="empty-state">
                 <h3>No allocations found</h3>
-                <p>Try adjusting your search criteria</p>
+                <p>Try adjusting your search criteria or upload a file</p>
               </div>
             )}
           </div>

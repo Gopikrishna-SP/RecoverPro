@@ -2,24 +2,78 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Mail } from "lucide-react";
 
+// API Configuration
+const API_BASE_URL = 'http://localhost:8080/api';
+
 export default function SigninPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log('Error Response:', errorData);
+        throw new Error(errorData.message || 'Invalid email or password');
+      }
+
+      const data = await response.json();
+      console.log('Success Response:', data);
+      const { token, username, email: userEmail, id, roles } = data;
+
+      // Store token and user info
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('user', JSON.stringify({
+        id,
+        username,
+        email: userEmail,
+        roles,
+      }));
+
+      // Remember me functionality
+      if (rememberMe) {
+        localStorage.setItem('rememberEmail', email);
+      } else {
+        localStorage.removeItem('rememberEmail');
+      }
+
+      // Navigate to dashboard
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setLoading(false);
-      navigate("/dashboard");
-    }, 1000);
+    }
   };
+
+  // Load remembered email on component mount
+  React.useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   return (
     <>
@@ -271,9 +325,11 @@ export default function SigninPage() {
               <input
                 type="email"
                 className="form-input"
+                placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
           </div>
@@ -285,16 +341,23 @@ export default function SigninPage() {
               <input
                 type="password"
                 className="form-input"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
           </div>
 
           <div className="form-actions">
             <div className="remember-me">
-              <input type="checkbox" id="remember" />
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
               <label htmlFor="remember">Remember me</label>
             </div>
             <div className="forgot-password">
