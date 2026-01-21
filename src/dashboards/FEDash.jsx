@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { MapPin, FileText, CheckCircle, Clock, Camera, Phone, Navigation, Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin, FileText, CheckCircle, Clock, Camera, Phone, Navigation, Eye, Loader, X, ArrowRight } from 'lucide-react';
+import StartVisit from '../pages/StartVisit'; 
 
 const styles = `
   * {
@@ -319,54 +320,259 @@ const styles = `
     border-color: rgba(59, 130, 246, 0.5);
   }
 
-  .table-container {
-    overflow-x: auto;
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #94a3b8;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
+  .error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
   }
 
-  th {
-    text-align: left;
-    padding: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #cbd5e1;
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
     border-bottom: 1px solid rgba(71, 85, 105, 0.2);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    sticky: top 0;
+    background: rgba(15, 23, 42, 0.8);
   }
 
-  td {
-    padding: 14px 12px;
-    font-size: 14px;
-    color: #cbd5e1;
-    border-bottom: 1px solid rgba(71, 85, 105, 0.1);
+  .modal-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
   }
 
-  tr:hover {
-    background: rgba(59, 130, 246, 0.05);
-  }
-
-  .view-btn {
+  .close-btn {
     background: none;
     border: none;
-    color: #60a5fa;
+    color: #94a3b8;
     cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    display: inline-flex;
+    padding: 8px;
+    display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 12px;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
   }
 
-  .view-btn:hover {
+  .close-btn:hover {
     background: rgba(59, 130, 246, 0.1);
-    color: #93c5fd;
+    color: #60a5fa;
+  }
+
+  .modal-body {
+    padding: 24px;
+  }
+
+  .loan-info {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .loan-info-label {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .loan-info-value {
+    font-size: 18px;
+    color: #60a5fa;
+    font-weight: 700;
+  }
+
+  .addresses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .address-card {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(71, 85, 105, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .address-card:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(30, 41, 59, 0.8);
+  }
+
+  .address-info {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .address-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #60a5fa;
+    flex-shrink: 0;
+  }
+
+  .address-text-info {
+    flex: 1;
+  }
+
+  .address-text-info label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .address-text-info span {
+    font-size: 14px;
+    color: #e2e8f0;
+    line-height: 1.4;
+  }
+
+  .address-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .modal-action-btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .modal-action-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+  }
+
+  .modal-action-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+  }
+
+  .modal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #94a3b8;
+  }
+
+  .modal-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .detail-field {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .detail-field:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+
+  .detail-field label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .detail-field span {
+    font-size: 15px;
+    font-weight: 600;
+    color: #60a5fa;
+    word-break: break-word;
+  }
+
+  @media (max-width: 768px) {
+    .details-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 1024px) {
@@ -376,70 +582,178 @@ const styles = `
     .case-details {
       grid-template-columns: 1fr;
     }
+    .address-card {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .address-actions {
+      width: 100%;
+    }
+    .modal-action-btn {
+      flex: 1;
+    }
   }
 `;
 
 export default function FieldExecutiveDashboard() {
   const [activeTab, setActiveTab] = useState('cases');
+  const [stats, setStats] = useState(null);
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const cases = [
-    {
-      id: 'CASE001',
-      loanNumber: 'LN-2024-001',
-      borrower: 'Rajesh Kumar',
-      loanAmount: '₹5,00,000',
-      status: 'pending',
-      address: '123 Main Street, Bengaluru, Karnataka 560001',
-      phone: '+91 98765 43210',
-      coordinates: '12.9716° N, 77.5946° E'
-    },
-    {
-      id: 'CASE002',
-      loanNumber: 'LN-2024-002',
-      borrower: 'Priya Sharma',
-      loanAmount: '₹3,50,000',
-      status: 'inprogress',
-      address: '456 Oak Lane, Mysuru, Karnataka 570001',
-      phone: '+91 87654 32109',
-      coordinates: '12.2958° N, 76.6394° E'
-    },
-    {
-      id: 'CASE003',
-      loanNumber: 'LN-2024-003',
-      borrower: 'Amit Singh',
-      loanAmount: '₹7,50,000',
-      status: 'completed',
-      address: '789 Elm Road, Pune, Maharashtra 411001',
-      phone: '+91 76543 21098',
-      coordinates: '18.5204° N, 73.8567° E'
-    },
-    {
-      id: 'CASE004',
-      loanNumber: 'LN-2024-004',
-      borrower: 'Neha Gupta',
-      loanAmount: '₹4,25,000',
-      status: 'pending',
-      address: '321 Pine Street, Chennai, Tamil Nadu 600001',
-      phone: '+91 65432 10987',
-      coordinates: '13.0827° N, 80.2707° E'
+  // Modal state
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [showCaseDetailsModal, setShowCaseDetailsModal] = useState(false);
+  const [selectedLoanNumber, setSelectedLoanNumber] = useState(null);
+  const [addresses, setAddresses] = useState([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [addressError, setAddressError] = useState(null);
+  const [caseDetails, setCaseDetails] = useState([]);
+  const [caseDetailsLoading, setCaseDetailsLoading] = useState(false);
+  const [caseDetailsError, setCaseDetailsError] = useState(null);
+
+  const [showVisitModal, setShowVisitModal] = useState(false);
+  const [selectedVisitData, setSelectedVisitData] = useState(null);
+
+
+  const API_BASE = 'http://localhost:8080/api/fe';
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const statsRes = await fetch(`${API_BASE}/dashboard/stats`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+      });
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData);
+      }
+
+      const casesRes = await fetch(`${API_BASE}/dashboard/cases`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+      });
+      if (casesRes.ok) {
+        const casesData = await casesRes.json();
+        setCases(casesData);
+      }
+
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to load dashboard data. Please ensure the backend is running.');
+      setLoading(false);
+      console.error('Fetch error:', err);
     }
-  ];
+  };
 
-  const addresses = [
-    { id: 1, loanNumber: 'LN-2024-001', location: '123 Main Street, Bengaluru', status: 'verified', lastVisit: '2024-01-10' },
-    { id: 2, loanNumber: 'LN-2024-002', location: '456 Oak Lane, Mysuru', status: 'pending', lastVisit: 'Not visited' },
-    { id: 3, loanNumber: 'LN-2024-003', location: '789 Elm Road, Pune', status: 'verified', lastVisit: '2024-01-08' },
-    { id: 4, loanNumber: 'LN-2024-004', location: '321 Pine Street, Chennai', status: 'rejected', lastVisit: '2024-01-06' },
-  ];
+  const openCaseDetailsModal = async (loanNumber) => {
+    setSelectedLoanNumber(loanNumber);
+    setShowCaseDetailsModal(true);
+    setCaseDetailsLoading(true);
+    setCaseDetailsError(null);
+    setCaseDetails([]);
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/cases`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        // Filter cases by loan number
+        const filteredData = data.filter(item => item.loanNumber === loanNumber);
+        setCaseDetails(filteredData);
+      } else {
+        setCaseDetailsError('Failed to load case details.');
+      }
+    } catch (err) {
+      setCaseDetailsError('Error fetching case details. Please try again.');
+      console.error('Fetch error:', err);
+    } finally {
+      setCaseDetailsLoading(false);
+    }
+  };
+
+  const openAddressModal = async (loanNumber) => {
+    setSelectedLoanNumber(loanNumber);
+    setShowAddressModal(true);
+    setAddressLoading(true);
+    setAddressError(null);
+    setAddresses([]);
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/cases/${loanNumber}/addresses`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setAddresses(data);
+      } else {
+        setAddressError('Failed to load addresses.');
+      }
+    } catch (err) {
+      setAddressError('Error fetching addresses. Please try again.');
+      console.error('Fetch error:', err);
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+
+
 
   const getStatusBadge = (status) => {
     if (status === 'completed') {
-      return <span className={`status-badge status-completed`}>Completed</span>;
+      return <span className="status-badge status-completed">Completed</span>;
     } else if (status === 'inprogress') {
-      return <span className={`status-badge status-inprogress`}>In Progress</span>;
+      return <span className="status-badge status-inprogress">In Progress</span>;
     } else if (status === 'pending') {
-      return <span className={`status-badge status-pending`}>Pending</span>;
+      return <span className="status-badge status-pending">Pending</span>;
     }
+  };
+
+  if (loading) {
+    return (
+      <>
+        <style>{styles}</style>
+        <div className="container">
+          <div className="loading">
+            <Loader size={32} />
+            <span style={{ marginLeft: '12px' }}>Loading dashboard...</span>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const handleNavigate = (address) => {
+    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+    window.open(mapsUrl, '_blank');
+  };
+
+  // And this function to open Start Visit modal:
+  const handleStartVisit = (loanNumber, address) => {
+    setSelectedVisitData({ loanNumber, address });
+    setShowVisitModal(true);
   };
 
   return (
@@ -447,40 +761,43 @@ export default function FieldExecutiveDashboard() {
       <style>{styles}</style>
       <div className="container">
         <div className="header">
-          <h1>Here’s what’s happening</h1>
+          <h1>Here's what's happening</h1>
           <p>Manage assigned cases, schedule and track field visits, and access location details.</p>
         </div>
 
-        <div className="stats-grid">
-          {[
-            { label: 'Total Cases', value: '18', icon: FileText, color: 'blue' },
-            { label: 'Completed Visits', value: '12', icon: CheckCircle, color: 'green' },
-            { label: 'Pending Cases', value: '4', icon: Clock, color: 'orange' },
-            { label: 'In Progress', value: '2', icon: Navigation, color: 'purple' },
-          ].map((stat, i) => (
-            <div key={i} className="stat-card">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <p>{stat.label}</p>
-                  <p>{stat.value}</p>
-                </div>
-                <div className={`stat-icon ${stat.color}`}>
-                  <stat.icon size={24} />
+        {error && <div className="error">{error}</div>}
+
+        {stats && (
+          <div className="stats-grid">
+            {[
+              { label: 'Total Cases', value: stats.totalCases || 0, icon: FileText, color: 'blue' },
+              { label: 'Completed Visits', value: stats.completedVisits || 0, icon: CheckCircle, color: 'green' },
+              { label: 'Pending Cases', value: stats.pendingCases || 0, icon: Clock, color: 'orange' },
+              { label: 'In Progress', value: stats.inProgress || 0, icon: Navigation, color: 'purple' },
+            ].map((stat, i) => (
+              <div key={i} className="stat-card">
+                <div className="stat-content">
+                  <div className="stat-info">
+                    <p>{stat.label}</p>
+                    <p>{stat.value}</p>
+                  </div>
+                  <div className={`stat-icon ${stat.color}`}>
+                    <stat.icon size={24} />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="tabs">
-          {['cases', 'addresses'].map((tab) => (
+          {['cases'].map((tab) => (
             <button
               key={tab}
               className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
-              {tab === 'cases' && 'Assigned Cases'}
-              {tab === 'addresses' && 'Addresses to Visit'}
+              Assigned Cases
             </button>
           ))}
         </div>
@@ -488,110 +805,215 @@ export default function FieldExecutiveDashboard() {
         {activeTab === 'cases' && (
           <div className="content-grid">
             <div>
-              {cases.map((caseItem) => (
-                <div key={caseItem.id} className="case-item">
-                  <div className="case-header">
-                    <div>
-                      <div className="case-title">{caseItem.borrower}</div>
-                      <div className="case-id">Case ID: {caseItem.id} | Loan: {caseItem.loanNumber}</div>
-                    </div>
-                    {getStatusBadge(caseItem.status)}
-                  </div>
-
-                  <div className="case-details">
-                    <div className="detail-item">
-                      <div className="detail-icon">
-                        <FileText size={16} />
+              {cases.length > 0 ? (
+                cases.map((caseItem) => (
+                  <div key={caseItem.caseId} className="case-item">
+                    <div className="case-header">
+                      <div>
+                        <div className="case-title">{caseItem.borrowerName}</div>
+                        <div className="case-id">
+                          Case ID: {caseItem.caseId} | Loan: {caseItem.loanNumber}
+                        </div>
                       </div>
-                      <div className="detail-content">
-                        <label>Loan Amount</label>
-                        <span>{caseItem.loanAmount}</span>
-                      </div>
+                      {getStatusBadge(caseItem.status)}
                     </div>
 
-                    <div className="detail-item">
-                      <div className="detail-icon">
-                        <Phone size={16} />
+                    <div className="case-details">
+                      <div className="detail-item">
+                        <div className="detail-icon">
+                          <FileText size={16} />
+                        </div>
+                        <div className="detail-content">
+                          <label>Loan Amount</label>
+                          <span>{caseItem.loanAmount}</span>
+                        </div>
                       </div>
-                      <div className="detail-content">
-                        <label>Contact</label>
-                        <span>{caseItem.phone}</span>
+
+                      <div className="detail-item">
+                        <div className="detail-icon">
+                          <Phone size={16} />
+                        </div>
+                        <div className="detail-content">
+                          <label>Contact</label>
+                          <span>{caseItem.phone}</span>
+                        </div>
+                      </div>
+
+                      <div className="detail-item">
+                        <div className="detail-icon">
+                          <MapPin size={16} />
+                        </div>
+                        <div className="detail-content">
+                          <label>Location</label>
+                          <span>{caseItem.location}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="detail-item">
-                      <div className="detail-icon">
-                        <Navigation size={16} />
-                      </div>
-                      <div className="detail-content">
-                        <label>Coordinates</label>
-                        <span>{caseItem.coordinates}</span>
-                      </div>
+                    <div className="case-address">
+                      <MapPin size={16} className="case-address-icon" />
+                      <div className="address-text">{caseItem.address}</div>
+                    </div>
+
+                    <div className="case-actions">
+                      <button
+                        className="action-btn action-primary"
+                        onClick={() => openCaseDetailsModal(caseItem.loanNumber)}
+                      >
+                        <FileText size={16} /> Case Details
+                      </button>
+                      <button
+                        className="action-btn action-secondary"
+                        onClick={() => openAddressModal(caseItem.loanNumber)}
+                      >
+                        <MapPin size={16} /> Addresses
+                      </button>
                     </div>
                   </div>
-
-                  <div className="case-address">
-                    <MapPin size={16} className="case-address-icon" />
-                    <div className="address-text">{caseItem.address}</div>
-                  </div>
-
-                  <div className="case-actions">
-                    <button className="action-btn action-primary">
-                      <Camera size={16} /> Start Visit
-                    </button>
-                    <button className="action-btn action-secondary">
-                      <MapPin size={16} /> Navigate
-                    </button>
-                    <button className="action-btn action-secondary">
-                      <Eye size={16} /> Details
-                    </button>
-                  </div>
+                ))
+              ) : (
+                <div className="card">
+                  <p style={{ textAlign: 'center', color: '#94a3b8' }}>No cases assigned yet.</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'addresses' && (
-          <div className="content-grid">
-            <div className="card">
-              <h3>Addresses to Visit</h3>
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Loan Number</th>
-                      <th>Location</th>
-                      <th>Status</th>
-                      <th>Last Visit</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {addresses.map((addr) => (
-                      <tr key={addr.id}>
-                        <td>{addr.loanNumber}</td>
-                        <td>{addr.location}</td>
-                        <td>
-                          <span className={`status-badge status-${addr.status === 'verified' ? 'completed' : addr.status === 'pending' ? 'pending' : 'inprogress'}`}>
-                            {addr.status.charAt(0).toUpperCase() + addr.status.slice(1)}
-                          </span>
-                        </td>
-                        <td>{addr.lastVisit}</td>
-                        <td>
-                          <button className="view-btn">
-                            <Navigation size={14} /> Navigate
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              )}
             </div>
           </div>
         )}
       </div>
+
+      {/* Address Modal */}
+      {showAddressModal && (
+        <div className="modal-overlay" onClick={() => setShowAddressModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Visit Addresses</h2>
+              <button
+                className="close-btn"
+                onClick={() => setShowAddressModal(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="loan-info">
+                <div>
+                  <div className="loan-info-label">Loan Number</div>
+                  <div className="loan-info-value">{selectedLoanNumber}</div>
+                </div>
+              </div>
+
+              {addressError && (
+                <div className="modal-error">{addressError}</div>
+              )}
+
+              {addressLoading ? (
+                <div className="modal-loading">
+                  <Loader size={32} />
+                  <span style={{ marginLeft: '12px' }}>Loading addresses...</span>
+                </div>
+              ) : addresses.length > 0 ? (
+                <div className="addresses-list">
+                  {addresses.map((address, idx) => (
+                    <div key={idx} className="address-card">
+                      <div className="address-info">
+                        <div className="address-icon">
+                          <MapPin size={20} />
+                        </div>
+                        <div className="address-text-info">
+                          <label>Address</label>
+                          <span>{address}</span>
+                        </div>
+                      </div>
+                      <div className="address-actions">
+                        {/* START VISIT BUTTON - Opens Start Visit Modal */}
+                        <button
+                          className="modal-action-btn modal-action-primary"
+                          onClick={() => handleStartVisit(selectedLoanNumber, address)}
+                        >
+                          <Camera size={14} /> Start
+                        </button>
+
+                        {/* NAVIGATE BUTTON - Opens Google Maps in New Tab */}
+                        <button
+                          className="modal-action-btn modal-action-primary"
+                          onClick={() => handleNavigate(address)}
+                        >
+                          <Navigation size={14} /> Go
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#94a3b8', padding: '20px' }}>
+                  No addresses available for this loan.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Case Details Modal */}
+      {showCaseDetailsModal && (
+        <div className="modal-overlay" onClick={() => setShowCaseDetailsModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Case Details</h2>
+              <button
+                className="close-btn"
+                onClick={() => setShowCaseDetailsModal(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="loan-info">
+                <div>
+                  <div className="loan-info-label">Loan Number</div>
+                  <div className="loan-info-value">{selectedLoanNumber}</div>
+                </div>
+              </div>
+
+              {caseDetailsError && (
+                <div className="modal-error">{caseDetailsError}</div>
+              )}
+
+              {caseDetailsLoading ? (
+                <div className="modal-loading">
+                  <Loader size={32} />
+                  <span style={{ marginLeft: '12px' }}>Loading case details...</span>
+                </div>
+              ) : caseDetails.length > 0 ? (
+                <div className="details-grid">
+                  {Object.entries(caseDetails[0]).map(([key, value]) => (
+                    <div key={key} className="detail-field">
+                      <label>{key.replace(/([A-Z])/g, ' $1').trim()}</label>
+                      <span>{value || '-'}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#94a3b8', padding: '20px' }}>
+                  No case details available.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+      )}
+
+      {showVisitModal && (
+        <StartVisit
+          isOpen={showVisitModal}  // ✅ Correct
+          onClose={() => setShowVisitModal(false)}
+          loanNumber={selectedVisitData?.loanNumber}
+          address={selectedVisitData?.address}
+        />
+      )}
     </>
   );
 }

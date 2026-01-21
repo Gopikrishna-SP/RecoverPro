@@ -1,34 +1,112 @@
-import React, { useState } from 'react';
-import { ChevronDown, Edit2, Save, X, Mail, Phone, MapPin, Building2, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Edit2, Save, X, Mail, Phone, MapPin, Building2, Shield, Loader } from 'lucide-react';
+
+const API_BASE = 'http://localhost:8080/api/profile';
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const [profileData, setProfileData] = useState({
-    firstName: 'John',
-    lastName: 'D',
-    email: 'john.d@example.com',
-    phone: '+1 (555) 123-4567',
-    location: 'New York, USA',
-    organization: 'RecoverPro Bank',
-    role: 'Super Admin',
-    status: 'Active'
+    id: null,
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    location: '',
+    organization: '',
+    fullName: '',
+    roles: [],
+    enabled: false
   });
 
   const [editData, setEditData] = useState(profileData);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditData(profileData);
+  // Fetch user profile on mount
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('authToken');
+      
+      const response = await fetch(API_BASE, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch profile');
+      
+      const data = await response.json();
+      setProfileData({
+        ...data,
+        roles: Array.isArray(data.roles) ? data.roles : []
+      });
+      setEditData({
+        ...data,
+        roles: Array.isArray(data.roles) ? data.roles : []
+      });
+    } catch (err) {
+      setError(err.message);
+      console.error('Fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSave = () => {
-    setProfileData(editData);
-    setIsEditing(false);
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditData({...profileData});
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      
+      const payload = {
+        firstName: editData.firstName,
+        lastName: editData.lastName,
+        email: editData.email,
+        phone: editData.phone,
+        location: editData.location,
+        organization: editData.organization
+      };
+
+      const response = await fetch(API_BASE, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error('Failed to update profile');
+      
+      const data = await response.json();
+      setProfileData(data);
+      setIsEditing(false);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      console.error('Save error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
+    setEditData({...profileData});
   };
 
   const handleChange = (field, value) => {
@@ -37,6 +115,12 @@ export default function ProfileDropdown() {
       [field]: value
     }));
   };
+
+  const roleDisplay = profileData.roles?.length > 0 
+    ? profileData.roles[0].replace('ROLE_', '').replace(/_/g, ' ')
+    : 'User';
+
+  const initials = `${profileData.firstName?.charAt(0) || 'U'}${profileData.lastName?.charAt(0) || 'S'}`;
 
   return (
     <>
@@ -73,7 +157,6 @@ export default function ProfileDropdown() {
 
         .profile-trigger:hover {
           background: rgba(96, 165, 250, 0.1);
-          border-color: rgba(96, 165, 250, 0.3);
         }
 
         .profile-pic {
@@ -125,49 +208,10 @@ export default function ProfileDropdown() {
           backdrop-filter: blur(20px);
         }
 
-
         .profile-dropdown.open {
           opacity: 1;
           visibility: visible;
           transform: translateY(0);
-        }
-
-        .dropdown-header {
-          padding: 0px; 
-          display: flex;
-          justify-content: flex-end;
-          align-items: flex-start;
-        }
-
-        .dropdown-title {
-          font-size: 14px;
-          font-weight: 600;
-          color: #f0f4f8;
-        }
-
-        .dropdown-actions {
-          display: flex;
-          gap: 8px;
-        }
-
-        .icon-btn-small {
-          background: rgba(96, 165, 250, 0.1);
-          border: 1px solid rgba(96, 165, 250, 0.2);
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s;
-          color: #8b94a5;
-        }
-
-        .icon-btn-small:hover {
-          background: rgba(96, 165, 250, 0.2);
-          color: #60a5fa;
-          border-color: rgba(96, 165, 250, 0.4);
         }
 
         .dropdown-content {
@@ -177,7 +221,8 @@ export default function ProfileDropdown() {
         .profile-section {
           display: flex;
           gap: 16px;
-          padding-bottom: 30px;
+          padding-bottom: 20px;
+          position: relative;
         }
 
         .profile-avatar-large {
@@ -217,6 +262,28 @@ export default function ProfileDropdown() {
           font-weight: 600;
           margin-top: 6px;
           border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .close-btn {
+          position: absolute;
+          top: 0;
+          right: 0;
+          background: rgba(96, 165, 250, 0.1);
+          border: 1px solid rgba(96, 165, 250, 0.2);
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #8b94a5;
+          transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+          background: rgba(96, 165, 250, 0.2);
+          color: #60a5fa;
         }
 
         .info-group {
@@ -305,7 +372,6 @@ export default function ProfileDropdown() {
 
         .btn-primary-small:hover {
           box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-          border-color: rgba(96, 165, 250, 0.5);
         }
 
         .btn-secondary-small {
@@ -316,7 +382,6 @@ export default function ProfileDropdown() {
 
         .btn-secondary-small:hover {
           background: rgba(96, 165, 250, 0.2);
-          border-color: rgba(96, 165, 250, 0.5);
         }
 
         .btn-danger-small {
@@ -327,56 +392,66 @@ export default function ProfileDropdown() {
 
         .btn-danger-small:hover {
           background: rgba(239, 68, 68, 0.2);
-          border-color: rgba(239, 68, 68, 0.5);
         }
 
-        .edit-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
+        .error-msg {
+          color: #f87171;
+          font-size: 12px;
+          margin-bottom: 12px;
+          padding: 8px;
+          background: rgba(239, 68, 68, 0.1);
+          border-radius: 6px;
+        }
+
+        .loading {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 20px;
+          color: #8b94a5;
         }
       `}</style>
 
       <div className="profile-wrapper">
         <button className="profile-trigger" onClick={() => setIsOpen(!isOpen)}>
-          <div className="profile-pic">
-            {profileData.firstName.charAt(0)}{profileData.lastName.charAt(0)}
-          </div>
+          <div className="profile-pic">{initials}</div>
           <div className="profile-info">
             <div className="profile-name">{profileData.firstName} {profileData.lastName}</div>
-            <div className="profile-role">{profileData.role}</div>
+            <div className="profile-role">{roleDisplay}</div>
           </div>
           <ChevronDown size={18} color="#8b94a5" />
         </button>
 
         <div className={`profile-dropdown ${isOpen ? 'open' : ''}`}>
           <div className="dropdown-content">
-            {!isEditing ? (
+            {loading && !isEditing ? (
+              <div className="loading">
+                <Loader size={20} className="animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="error-msg">{error}</div>
+            ) : !isEditing ? (
               <>
                 <div className="profile-section">
-                  <div className="profile-avatar-large">
-                    {profileData.firstName.charAt(0)}{profileData.lastName.charAt(0)}
-                  </div>
+                  <div className="profile-avatar-large">{initials}</div>
                   <div className="profile-details">
                     <div className="profile-name-large">
                       {profileData.firstName} {profileData.lastName}
                     </div>
-                    <div className="profile-badge">{profileData.status}</div>
-                  </div>
-                  <div className="dropdown-header">
-                    <div className="dropdown-actions">
-                      <button className="icon-btn-small" onClick={() => setIsOpen(false)} title="Close">
-                        <X size={16} />
-                      </button>
+                    <div className="profile-badge">
+                      {profileData.enabled ? 'Active' : 'Inactive'}
                     </div>
                   </div>
+                  <button className="close-btn" onClick={() => setIsOpen(false)} title="Close">
+                    <X size={16} />
+                  </button>
                 </div>
 
                 <div className="info-group show">
                   <div className="info-label">Role</div>
                   <div className="info-value">
                     <Shield size={14} />
-                    {profileData.role}
+                    {roleDisplay}
                   </div>
                 </div>
 
@@ -412,10 +487,17 @@ export default function ProfileDropdown() {
                   </div>
                 </div>
 
-
+                <div className="action-buttons">
+                  <button className="btn-small btn-primary-small" onClick={handleEdit}>
+                    <Edit2 size={14} />
+                    Edit Profile
+                  </button>
+                </div>
               </>
             ) : (
               <>
+                {error && <div className="error-msg">{error}</div>}
+                
                 <div className="info-group show">
                   <div className="info-label">First Name</div>
                   <input
@@ -479,11 +561,11 @@ export default function ProfileDropdown() {
                 </div>
 
                 <div className="action-buttons">
-                  <button className="btn-small btn-primary-small" onClick={handleSave}>
+                  <button className="btn-small btn-primary-small" onClick={handleSave} disabled={loading}>
                     <Save size={14} />
-                    Save
+                    {loading ? 'Saving...' : 'Save'}
                   </button>
-                  <button className="btn-small btn-danger-small" onClick={handleCancel}>
+                  <button className="btn-small btn-danger-small" onClick={handleCancel} disabled={loading}>
                     <X size={14} />
                     Cancel
                   </button>

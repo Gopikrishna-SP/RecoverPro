@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, FileText, TrendingUp, AlertCircle, Plus, Eye } from 'lucide-react';
+import { Users, FileText, TrendingUp, AlertCircle, Eye } from 'lucide-react';
 
 const styles = `
   * {
@@ -233,80 +233,6 @@ const styles = `
     color: #93c5fd;
   }
 
-  .single-card {
-    background: rgba(30, 41, 59, 0.5);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(71, 85, 105, 0.3);
-    border-radius: 12px;
-    padding: 24px;
-    max-width: 600px;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  .form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #cbd5e1;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    width: 100%;
-    padding: 12px 16px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(71, 85, 105, 0.3);
-    border-radius: 8px;
-    color: #ffffff;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    font-family: inherit;
-  }
-
-  .form-group input::placeholder,
-  .form-group textarea::placeholder {
-    color: #64748b;
-  }
-
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus {
-    outline: none;
-    border-color: rgba(59, 130, 246, 0.5);
-    background: rgba(15, 23, 42, 0.9);
-  }
-
-  .form-group textarea {
-    resize: none;
-    font-family: inherit;
-  }
-
-  .submit-btn {
-    width: 100%;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 8px;
-  }
-
-  .submit-btn:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    transform: translateY(-1px);
-  }
-
   @media (max-width: 1024px) {
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
@@ -335,11 +261,11 @@ export default function BankAdminDashboard() {
 
   const getStatusBadge = (status) => {
     if (status === 'active' || status === 'completed') {
-      return <span className={`status-badge status-active`}>Active</span>;
+      return <span className="status-badge status-active">Active</span>;
     } else if (status === 'pending') {
-      return <span className={`status-badge status-pending`}>Pending</span>;
+      return <span className="status-badge status-pending">Pending</span>;
     } else if (status === 'rejected') {
-      return <span className={`status-badge status-rejected`}>Rejected</span>;
+      return <span className="status-badge status-rejected">Rejected</span>;
     }
   };
 
@@ -348,7 +274,7 @@ export default function BankAdminDashboard() {
       <style>{styles}</style>
       <div className="container">
         <div className="header">
-          <h1>Here’s what’s happening</h1>
+          <h1>Here's what's happening</h1>
           <p>Overview of bank operations, partner entities, and field activity</p>
         </div>
 
@@ -358,8 +284,8 @@ export default function BankAdminDashboard() {
             { label: 'Active Field Visits', value: '12', icon: Users, color: 'green' },
             { label: 'Pending Reviews', value: '7', icon: AlertCircle, color: 'orange' },
             { label: 'Completion Rate', value: '94%', icon: TrendingUp, color: 'purple' },
-          ].map((stat, i) => (
-            <div key={i} className="stat-card">
+          ].map((stat) => (
+            <div key={stat.label} className="stat-card">
               <div className="stat-content">
                 <div className="stat-info">
                   <p>{stat.label}</p>

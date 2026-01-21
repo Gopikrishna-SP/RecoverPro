@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Briefcase, CheckCircle, AlertCircle, Plus, Eye, Edit } from 'lucide-react';
+import { Users, Briefcase, CheckCircle, AlertCircle, Eye, Edit } from 'lucide-react';
 
 const styles = `
   * {
@@ -234,123 +234,11 @@ const styles = `
     color: #93c5fd;
   }
 
-  .single-card {
-    background: rgba(30, 41, 59, 0.5);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(71, 85, 105, 0.3);
-    border-radius: 12px;
-    padding: 24px;
-    max-width: 700px;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  .form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #cbd5e1;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    width: 100%;
-    padding: 12px 16px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(71, 85, 105, 0.3);
-    border-radius: 8px;
-    color: #ffffff;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    font-family: inherit;
-  }
-
-  .form-group input::placeholder,
-  .form-group textarea::placeholder {
-    color: #64748b;
-  }
-
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus {
-    outline: none;
-    border-color: rgba(59, 130, 246, 0.5);
-    background: rgba(15, 23, 42, 0.9);
-  }
-
-  .form-group textarea {
-    resize: none;
-    font-family: inherit;
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .submit-btn {
-    width: 100%;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 8px;
-  }
-
-  .submit-btn:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    transform: translateY(-1px);
-  }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-    padding: 16px;
-    background: rgba(15, 23, 42, 0.5);
-    border-radius: 8px;
-    border: 1px solid rgba(71, 85, 105, 0.2);
-  }
-
-  .info-item label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .info-item span {
-    font-size: 14px;
-    color: #e2e8f0;
-  }
-
   @media (max-width: 1024px) {
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
     }
     .content-grid {
-      grid-template-columns: 1fr;
-    }
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-    .info-grid {
       grid-template-columns: 1fr;
     }
   }
@@ -374,11 +262,11 @@ export default function VendorAdminDashboard() {
 
   const getStatusBadge = (status) => {
     if (status === 'active') {
-      return <span className={`status-badge status-active`}>Active</span>;
+      return <span className="status-badge status-active">Active</span>;
     } else if (status === 'pending') {
-      return <span className={`status-badge status-pending`}>Pending</span>;
+      return <span className="status-badge status-pending">Pending</span>;
     } else if (status === 'inactive') {
-      return <span className={`status-badge status-inactive`}>Inactive</span>;
+      return <span className="status-badge status-inactive">Inactive</span>;
     }
   };
 
@@ -387,18 +275,38 @@ export default function VendorAdminDashboard() {
       <style>{styles}</style>
       <div className="container">
         <div className="header">
-          <h1>Here’s what’s happening</h1>
+          <h1>Here's what's happening</h1>
           <p>Oversee field officers, allocations, and case assignments</p>
         </div>
 
         <div className="stats-grid">
           {[
-            { label: 'Total Field Officers', value: '24', icon: Users, color: 'blue' },
-            { label: 'Active Allocations', value: '18', icon: Briefcase, color: 'green' },
-            { label: 'Total Cases', value: '156', icon: CheckCircle, color: 'purple' },
-            { label: 'Pending Reviews', value: '5', icon: AlertCircle, color: 'orange' },
-          ].map((stat, i) => (
-            <div key={i} className="stat-card">
+            {
+              label: 'Visits Pending Today',
+              value: '18',
+              icon: AlertCircle,
+              color: 'orange',
+            },
+            {
+              label: 'Collections Today',
+              value: '₹4.2L',
+              icon: Users,
+              color: 'green',
+            },
+            {
+              label: 'Visits Completed Today',
+              value: '48',
+              icon: CheckCircle,
+              color: 'blue',
+            },
+            {
+              label: 'Total Active Cases',
+              value: '156',
+              icon: Briefcase,
+              color: 'purple',
+            },
+          ].map((stat) => (
+            <div key={stat.label} className="stat-card">
               <div className="stat-content">
                 <div className="stat-info">
                   <p>{stat.label}</p>

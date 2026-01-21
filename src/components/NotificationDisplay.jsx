@@ -7,29 +7,11 @@ const NotificationDisplay = () => {
   const [showPanel, setShowPanel] = useState(false);
 
   useEffect(() => {
-    // Dummy notification
-    const dummyNotifications = [
-      {
-        id: 1,
-        title: 'System Update',
-        message: 'New version available. Please update your system.',
-        type: 'info',
-        read: false,
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 2,
-        title: 'Success',
-        message: 'Your changes have been saved successfully.',
-        type: 'success',
-        read: false,
-        createdAt: new Date().toISOString()
-      }
-    ];
+    // Fetch immediately
+    fetchNotifications();
+    fetchUnreadCount();
     
-    setNotifications(dummyNotifications);
-    setUnreadCount(dummyNotifications.filter(n => !n.read).length);
-    
+    // Then fetch every 10 seconds
     const interval = setInterval(() => {
       fetchNotifications();
       fetchUnreadCount();
@@ -40,7 +22,13 @@ const NotificationDisplay = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('/api/notifications/me');
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('http://localhost:8080/api/notifications/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setNotifications(Array.isArray(data) ? data : []);
@@ -52,7 +40,13 @@ const NotificationDisplay = () => {
 
   const fetchUnreadCount = async () => {
     try {
-      const response = await fetch('/api/notifications/me/unread-count');
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('http://localhost:8080/api/notifications/me/unread-count', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (response.ok) {
         const count = await response.json();
         setUnreadCount(typeof count === 'number' ? count : 0);
@@ -64,8 +58,13 @@ const NotificationDisplay = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await fetch(`/api/notifications/me/read/${notificationId}`, {
-        method: 'PATCH'
+      const token = localStorage.getItem('authToken');
+      await fetch(`http://localhost:8080/api/notifications/me/read/${notificationId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       setNotifications(prev => 
         prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
@@ -78,8 +77,13 @@ const NotificationDisplay = () => {
 
   const markAllAsRead = async () => {
     try {
-      await fetch('/api/notifications/me/read-all', {
-        method: 'PATCH'
+      const token = localStorage.getItem('authToken');
+      await fetch('http://localhost:8080/api/notifications/me/read-all', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
@@ -244,8 +248,8 @@ const NotificationDisplay = () => {
                       cursor: 'pointer',
                       transition: 'background-color 0.2s'
                     }}
-                    onMouseEnter={(e) => !notification.read && (e.target.style.backgroundColor = '#1f2a38')}
-                    onMouseLeave={(e) => (e.target.style.backgroundColor = notification.read ? '#0f1419' : '#1a2530')}
+                    onMouseEnter={(e) => !notification.read && (e.currentTarget.style.backgroundColor = '#1f2a38')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = notification.read ? '#0f1419' : '#1a2530')}
                     onClick={() => !notification.read && markAsRead(notification.id)}
                   >
                     <div style={{ display: 'flex', gap: '12px' }}>
@@ -324,8 +328,8 @@ const NotificationDisplay = () => {
                     fontWeight: '500',
                     padding: '8px 0'
                   }}
-                  onMouseEnter={(e) => e.target.style.color = '#93c5fd'}
-                  onMouseLeave={(e) => e.target.style.color = '#60a5fa'}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#93c5fd'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#60a5fa'}
                 >
                   Mark all as read
                 </button>
