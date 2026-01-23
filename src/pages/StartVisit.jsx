@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
 import { Camera, X, CheckCircle, Loader, ChevronRight, ChevronLeft } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 const styles = `
   * {
@@ -399,34 +399,53 @@ export default function StartVisit({ isOpen, onClose, loanData }) {
   const [showCamera, setShowCamera] = useState(false);
   const [customerPhoto, setCustomerPhoto] = useState(null);
 
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
+const videoRef = useRef(null);
+const canvasRef = useRef(null);
 
-  const [formData, setFormData] = useState({
-    allocationId: loanData?.allocationId || null,
-    segment: loanData?.segment || '',
-    product: loanData?.product || '',
-    state: loanData?.state || '',
-    branch: loanData?.branch || '',
-    location: loanData?.location || '',
-    loanNumber: loanData?.loanNumber || '',
-    customerName: loanData?.customerName || '',
-    posInCr: loanData?.posInCr || '',
-    emi: loanData?.emi || '',
-    bkt: loanData?.bkt || '',
-    disp: null,
-    contactability: null,
-    residenceStatus: null,
-    officeStatus: null,
-    classificationCode: null,
-    reasonForDefault: null,
-    projection: null,
-    customerProfile: null,
-    amount: '',
-    ptpDate: '',
-    fieldUpdateFeedback: '',
-    visitDate: new Date().toISOString().split('T')[0],
-  });
+const [formData, setFormData] = useState({
+  allocationId: null,
+  segment: '',
+  product: '',
+  state: '',
+  branch: '',
+  location: '',
+  loanNumber: '',
+  customerName: '',
+  posInCr: '',
+  emi: '',
+  bkt: '',
+  disp: null,
+  contactability: null,
+  residenceStatus: null,
+  officeStatus: null,
+  classificationCode: null,
+  reasonForDefault: null,
+  projection: null,
+  customerProfile: null,
+  amount: '',
+  ptpDate: '',
+  fieldUpdateFeedback: '',
+  visitDate: new Date().toISOString().split('T')[0],
+});
+
+useEffect(() => {
+  if (loanData && isOpen) {
+    setFormData(prevData => ({
+      ...prevData,
+      allocationId: loanData.allocationId || null,
+      loanNumber: loanData.loanNumber || '',
+      segment: loanData.segment || '',
+      product: loanData.product || '',
+      state: loanData.state || '',
+      branch: loanData.branch || '',
+      location: loanData.location || '',
+      customerName: loanData.customerName || '',
+      posInCr: loanData.posInCr || '',
+      emi: loanData.emi || '',
+      bkt: loanData.bkt || '',
+    }));
+  }
+}, [loanData, isOpen]);
 
   const startCamera = () => {
     setShowCamera(true);

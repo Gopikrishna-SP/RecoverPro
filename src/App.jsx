@@ -8,6 +8,7 @@ import PublicLayout from './layouts/PublicLayout';
 import Dashboard from './pages/Dashboard';
 import SuperAdminDash from './dashboards/SuperAdminDash';
 import VisitLog from './pages/VisitLog';
+import MyVisit from './pages/MyVisit';  
 import Allocation from './pages/Allocation';
 import CaseAssign from './pages/CaseAssign';
 import AllocationUpload from './pages/AllocationUpload';
@@ -38,6 +39,7 @@ export default function App() {
 
         {/* VISITS ROUTES */}
         <Route path="/visits/log" element={<VisitLog />} />
+        <Route path="/visits/my-visit" element={<MyVisit />} />
       </Route>
 
       {/* FALLBACK */}

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Download, Eye, Edit, Trash2, Upload } from 'lucide-react';
 
 const styles = `
@@ -186,6 +187,23 @@ const styles = `
     overflow-y: auto;
   }
 
+  .table-container::-webkit-scrollbar {
+    height: 14px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    background: rgba(71, 85, 105, 0.3);
+    border-radius: 3px;
+  }
+
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(71, 85, 105, 0.5);
+  }
+
   table {
     width: 100%;
     border-collapse: collapse;
@@ -196,7 +214,7 @@ const styles = `
   thead {
     position: sticky;
     top: 0;
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.95);
     z-index: 10;
   }
 
@@ -285,19 +303,20 @@ const styles = `
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     padding: 16px;
     border-top: 1px solid rgba(71, 85, 105, 0.2);
+    flex-wrap: wrap;
   }
 
   .page-btn {
-    padding: 6px 12px;
+    padding: 6px 10px;
     background: rgba(30, 41, 59, 0.5);
     border: 1px solid rgba(71, 85, 105, 0.3);
     color: #cbd5e1;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     transition: all 0.2s ease;
   }
 
@@ -317,58 +336,38 @@ const styles = `
     border-color: transparent;
   }
 
+  .pagination-info {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin: 0 8px;
+  }
+
   @media (max-width: 768px) {
     .table-container {
-      max-height: 60vh;
-    }
-    th, td {
-      padding: 8px 6px;
-      font-size: 10px;
+      height: 300px;
     }
   }
 `;
 
 const ALL_COLUMNS = [
   'SEGMENT', 'PRODUCT', 'ZONE', 'STATE', 'BRANCH', 'LOCATION', 'LOANNUMBER', 'CUSTOMER NAME',
-  'DISBURSED AMOUNT (IN CR)', 'DISBURSED DATE', 'POS (IN CR)', 'POS Amt', 'EMI', 'EMI START DATE', 'EMI END DATE',
-  'BKT TAG', 'OPENING BKT', 'ASHV DA/PTC', 'SECURITIZATION', 'SE/INSE', 'AGENCY CODE', 'AGENCY',
-  'MANAGER EMP ID', 'MANAGER', 'ZM EMP ID', 'ZONAL MANAGER', 'Main_Applicant_Mobile_No', 'Main_applicant_Name',
-  'Co_Applicant1_Name', 'Co_Applicant1_Mobile_No', 'Relation_with_Main_Applicant', 'address_priority_1',
-  'address_priority_2', 'address_priority_3', 'address_priority_4', 'address_priority_5', 'address_priority_6',
-  'address_priority_7', 'address_priority_8', 'business_pin_code', 'residence_pin_code', 'main_pincode',
-  'pan_main_app', 'dob_main_app', 'pan_co_app', 'dob_co_app', 'address_1', 'address_2', 'address_3', 'address_4',
-  'address_5', 'address_6', 'address_7', 'address_8', 'address_9', 'address_10', 'phone_1', 'phone_2', 'phone_3',
-  'phone_4', 'phone_5', 'phone_6', 'phone_7', 'phone_8', 'phone_9', 'phone_10', 'MONTH - LAST NOTICE', 'LRN 1',
-  'LRN MONTH 2', 'LRN 2', 'LRN MONTH 3', 'LRN 3', 'REVISED STAGE IN ARBITRATION (20.11.2025)', 'ADVOCATE ON RECORD (20.11.2025)',
-  'ARBITRATION INVOKATION DATE  1   (20.11.2025)', 'ARBITRATION INVOKATION DATE  2  (20.11.2025)', 'TENTATIVE DATE TO ISSUE REFERENCE (20.11.2025)',
-  'LETTER TO ARBITRATOR (20.11.2025)', 'TENTATIVE DATE FOR FREEZING AND OTHER ORDERS (20.11.2025)', 'RELIEF (20.11.2025)', 'NODH',
-  'MONTH OF NOTICE', 'NOTICE DATE', 'Date of Filling Confrmation', 'SEC 25- FILED/NOT FILED', 'SEC 25 -  PROCESS STAGE',
-  'SEC 25 -  LDOH', 'SEC 25 -  NDOH', 'LISTING DATE', 'DATE OF FILING', 'COURT/FORUM', 'Case Number', 'ADVOCATE NAME',
-  'ADVOCATE\'S CONTACT NUMBER', 'AUTHORIZED OFFICER', 'STAGE 1 - FOR VERIFICATION', 'STAGE 1 - HEARING ON',
-  'STAGE 2 - SUMMONS STAGE', 'STAGE 2 - SUMMONS COLLECTED/ NOT COLLECTED/ DISPATCHED/ NOT DISPATCHED', 'STAGE 3 - APPERANCE/ NON APPEARANCE',
-  'STAGE 3 - HEARING ON', 'STAGE 4 - BAILABLE WARRANT ISSUED DATE', 'STAGE 4 - BAILABLE WARRANT COLLECTED/ NOT COLLECTED/ DISPATCHED/ NOT DISPATCHED',
-  'LOCATION FILLING', 'CASE NUMBER', 'Case Withdrawal Date', 'REMARKS', 'CLAIM AMOUNT', 'BW RE ISSUED DATE', 'BW RE ISSUED COLLECTION DATE',
-  'STAGE 5 - NON BAILABLE WARRANT ISSUED DATE', 'STAGE 5 - NON BAILABLE WARRANT COLLECTED/ NOT COLLECTED/ DISPATCHED/ NOT DISPATCHED',
-  'STAGE 6 - NON BAILABLE WARRANT REISSUED DATE', 'STAGE 7 - NON BAILABLE WARRANT REISSUED DATE', 'STAGE 8 - NON BAILABLE WARRANT REISSUED DATE',
-  'STAGE 5 - PROCLAMATION ISSUED DATE', 'STAGE 5 - PROCLAMATION ISSUED/ COLLECTED/ DISPATCHED', 'STAGE 5 - PROCLAMATION COLLECTED / NOT COLLECTED',
-  'STAGE 5 - ATTACHMENT OF PROPERTY COLLECTED/ NOT COLLECTED',
-  'Account Holder 1', 'BANK NAME 1', 'ACCOUNT NUMBER 1', 'IFSC CODE 1', 'Account Holder 2', 'BANK NAME 2',
-  'ACCOUNT NUMBER 2', 'IFSC CODE 2', 'Account Holder 3', 'BANK NAME 3', 'ACCOUNT NUMBER 3', 'IFSC CODE 3'
+  'DISBURSED AMOUNT (IN CR)', 'DISBURSED DATE', 'POS (IN CR)', 'POS Amt', 'EMI', 'EMI START DATE',
+  'Main_Applicant_Mobile_No', 'Main_applicant_Name', 'MANAGER', 'AGENCY'
 ];
 
-// API Configuration
+
 const API_BASE_URL = 'http://localhost:8080/api';
 
 export default function AllocationsList() {
+  const navigate = useNavigate();
   const [allocations, setAllocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState(null);
-  const fileInputRef = useState(null)[1];
+  const [fileInputRef, setFileInputRef] = useState(null);
   const itemsPerPage = 10;
 
-  // Fetch allocations on component mount
   useEffect(() => {
     fetchAllocations();
   }, []);
@@ -377,9 +376,9 @@ export default function AllocationsList() {
     setLoading(true);
     setStatus(null);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       if (!token) {
-        setStatus({ type: 'error', message: 'Authentication token not found. Please login again.' });
+        setStatus({ type: 'error', message: 'Please login first' });
         setLoading(false);
         return;
       }
@@ -392,30 +391,25 @@ export default function AllocationsList() {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        setStatus({ type: 'error', message: 'Session expired. Please login again.' });
+        localStorage.clear();
+        setStatus({ type: 'error', message: 'Session expired. Please login.' });
         return;
       }
 
-      if (!response.ok) throw new Error('Failed to fetch allocations');
+      if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
-      
-      // Flatten the allocationData structure
+
       const flattenedData = data.map(item => ({
         id: item.id,
         loanNumber: item.loanNumber,
-        fieldExecutiveId: item.fieldExecutiveId,
         status: item.status,
-        assignedAt: item.assignedAt,
-        lastVisitedAt: item.lastVisitedAt,
         visitCount: item.visitCount,
-        ...item.allocationData, // Spread all allocation data properties at root level
+        ...item.allocationData,
       }));
-      
+
       setAllocations(flattenedData);
     } catch (err) {
-      setStatus({ type: 'error', message: 'Failed to load allocations: ' + err.message });
+      setStatus({ type: 'error', message: 'Failed to load: ' + err.message });
     } finally {
       setLoading(false);
     }
@@ -431,10 +425,8 @@ export default function AllocationsList() {
     formData.append('file', file);
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Authentication token not found. Please login again.');
-      }
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) throw new Error('Please login first');
 
       const response = await fetch(`${API_BASE_URL}/allocations/upload`, {
         method: 'POST',
@@ -445,17 +437,22 @@ export default function AllocationsList() {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        throw new Error('Session expired. Please login again.');
+        localStorage.clear();
+        throw new Error('Session expired');
       }
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Upload failed');
+      }
+
       const data = await response.json();
       setStatus({
         type: 'success',
-        message: `${data.recordsInserted} records inserted successfully`,
+        message: `${data.recordsInserted} records uploaded successfully`,
       });
+
+      e.target.value = '';
       await fetchAllocations();
     } catch (err) {
       setStatus({ type: 'error', message: 'Upload failed: ' + err.message });
@@ -468,10 +465,9 @@ export default function AllocationsList() {
     if (!searchTerm) return allocations;
     const search = searchTerm.toLowerCase();
     return allocations.filter(item =>
-      (item.LOANNUMBER?.toLowerCase().includes(search)) ||
-      (item['CUSTOMER NAME']?.toLowerCase().includes(search)) ||
-      (item.Main_Applicant_Mobile_No?.toString().includes(search)) ||
-      (item.Main_applicant_Name?.toLowerCase().includes(search))
+      (item.LOANNUMBER?.toString().toLowerCase().includes(search)) ||
+      (item['CUSTOMER NAME']?.toString().toLowerCase().includes(search)) ||
+      (item.Main_Applicant_Mobile_No?.toString().includes(search))
     );
   }, [searchTerm, allocations]);
 
@@ -480,20 +476,26 @@ export default function AllocationsList() {
   const paginatedData = filteredData.slice(startIdx, startIdx + itemsPerPage);
 
   const handleExport = () => {
-    const csv = [
-      ALL_COLUMNS.join(','),
-      ...paginatedData.map(row =>
-        ALL_COLUMNS.map(col => {
-          const val = row[col];
-          return typeof val === 'string' ? `"${val || ''}"` : (val || '');
-        }).join(',')
-      ),
-    ].join('\n');
+    const headers = ALL_COLUMNS.join(',');
+    const rows = paginatedData.map(row =>
+      ALL_COLUMNS.map(col => {
+        const val = row[col];
+        return typeof val === 'string' ? `"${val || ''}"` : (val || '');
+      }).join(',')
+    );
 
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    link.download = 'allocations.csv';
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `allocations-${Date.now()}.csv`);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -502,18 +504,13 @@ export default function AllocationsList() {
       <div className="container">
         <div className="header">
           <h1>Allocations</h1>
-          <p>View all loan allocations with 150+ fields</p>
+          <p>View and manage loan allocations</p>
         </div>
 
         {status && (
           <div className={`status-message ${status.type}`}>
             <span>{status.message}</span>
-            <button
-              className="close-btn"
-              onClick={() => setStatus(null)}
-            >
-              ×
-            </button>
+            <button className="close-btn" onClick={() => setStatus(null)}>×</button>
           </div>
         )}
 
@@ -523,7 +520,7 @@ export default function AllocationsList() {
             <input
               type="text"
               className="search-input"
-              placeholder="Search by loan, customer, mobile, applicant..."
+              placeholder="Search loan, customer, mobile..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -533,48 +530,39 @@ export default function AllocationsList() {
           </div>
           <div className="btn-group">
             <input
-              ref={fileInputRef}
+              ref={setFileInputRef}
               type="file"
-              accept=".xlsx,.xls"
+              accept=".xlsx,.xls,.csv"
               className="file-input"
               onChange={handleFileUpload}
               disabled={loading}
             />
             <button
               className="upload-btn"
-              onClick={() => fileInputRef?.click?.()}
-              disabled={loading}
+              onClick={() => navigate('/loans/upload')}
             >
-              <Upload size={14} /> Upload Excel
+              <Upload size={14} /> Upload
             </button>
-            <button className="export-btn" onClick={handleExport}>
-              <Download size={14} /> Export CSV
+            <button className="export-btn" onClick={handleExport} disabled={paginatedData.length === 0}>
+              <Download size={14} /> Export
             </button>
           </div>
         </div>
 
         <div className="stats-bar">
-          <div className="stat-info">
-            Total: <strong>{filteredData.length}</strong> allocations
-          </div>
-          <div className="stat-info">
-            Page: <strong>{currentPage}</strong> of <strong>{totalPages || 1}</strong>
-          </div>
+          <div className="stat-info">Total: <strong>{filteredData.length}</strong></div>
+          <div className="stat-info">Page: <strong>{currentPage}</strong> of <strong>{totalPages || 1}</strong></div>
         </div>
 
         <div className="table-wrapper">
           <div className="table-container">
             {loading ? (
-              <div className="empty-state">
-                <h3>Loading allocations...</h3>
-              </div>
+              <div className="empty-state"><h3>Loading...</h3></div>
             ) : paginatedData.length > 0 ? (
               <table>
                 <thead>
                   <tr>
-                    {ALL_COLUMNS.map(col => (
-                      <th key={col}>{col}</th>
-                    ))}
+                    {ALL_COLUMNS.map(col => <th key={col}>{col}</th>)}
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -583,24 +571,14 @@ export default function AllocationsList() {
                     <tr key={row.id || idx}>
                       {ALL_COLUMNS.map(col => (
                         <td key={`${idx}-${col}`} title={row[col] || '-'}>
-                          {col.includes('Amount') || col.includes('Emi')
-                            ? <span className="currency">₹{row[col]?.toLocaleString() || '-'}</span>
-                            : col.includes('Date')
-                            ? <span className="date">{row[col] || '-'}</span>
-                            : row[col] || '-'}
+                          {row[col] || '-'}
                         </td>
                       ))}
                       <td>
                         <div className="action-btns">
-                          <button className="action-btn" title="View">
-                            <Eye size={12} />
-                          </button>
-                          <button className="action-btn" title="Edit">
-                            <Edit size={12} />
-                          </button>
-                          <button className="action-btn delete" title="Delete">
-                            <Trash2 size={12} />
-                          </button>
+                          <button className="action-btn" title="View"><Eye size={12} /></button>
+                          <button className="action-btn" title="Edit"><Edit size={12} /></button>
+                          <button className="action-btn delete" title="Delete"><Trash2 size={12} /></button>
                         </div>
                       </td>
                     </tr>
@@ -608,32 +586,29 @@ export default function AllocationsList() {
                 </tbody>
               </table>
             ) : (
-              <div className="empty-state">
-                <h3>No allocations found</h3>
-                <p>Try adjusting your search criteria or upload a file</p>
-              </div>
+              <div className="empty-state"><h3>No data</h3></div>
             )}
           </div>
 
-          {paginatedData.length > 0 && (
+          {totalPages > 1 && (
             <div className="pagination">
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+              >
+                First
+              </button>
+
               <button
                 className="page-btn"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
-                Previous
+                Prev
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-                <button
-                  key={pageNum}
-                  className={`page-btn ${pageNum === currentPage ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(pageNum)}
-                >
-                  {pageNum}
-                </button>
-              ))}
+              <span className="pagination-info">{currentPage} / {totalPages}</span>
 
               <button
                 className="page-btn"
@@ -641,6 +616,14 @@ export default function AllocationsList() {
                 disabled={currentPage === totalPages}
               >
                 Next
+              </button>
+
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+              >
+                Last
               </button>
             </div>
           )}

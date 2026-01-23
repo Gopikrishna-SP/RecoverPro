@@ -55,7 +55,7 @@ export default function Sidebar({ collapsed, onToggle }) {
       defaultPath: '/visits/log',
       subItems: [
         { label: 'Visit Log', path: '/visits/log' },
-        { label: 'Start Visit', path: '/visits/start' }
+        { label: 'My Visit', path: '/visits/my-visit' }
       ]
     },
     {

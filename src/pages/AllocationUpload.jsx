@@ -361,6 +361,54 @@ const styles = `
     border-color: rgba(16, 185, 129, 0.5);
   }
 
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+
+  .loading-card {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    border-radius: 16px;
+    padding: 48px;
+    text-align: center;
+    min-width: 300px;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(59, 130, 246, 0.2);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+
+  .loading-subtext {
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
   @media (max-width: 1024px) {
     .stats-grid {
       grid-template-columns: repeat(1, 1fr);
@@ -374,6 +422,7 @@ const styles = `
 export default function AllocationUpload() {
   const [files, setFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -415,19 +464,62 @@ export default function AllocationUpload() {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
-  const handleUpload = () => {
-    console.log('Uploading files:', files);
-    // Call API endpoint: POST /api/allocations/upload
+  const handleUpload = async () => {
+    if (files.length === 0) return;
+
+    setUploading(true);
+    try {
+      for (let file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch('http://localhost:8080/api/allocations/upload', {
+          method: 'POST',
+          body: formData,
+          headers: headers,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(`Upload failed for file ${file.name}: ${data.message}`);
+          setUploading(false);
+          return;
+        }
+      }
+
+      alert(`Upload successful! ${files.length} file(s) uploaded.`);
+      setFiles([]);
+      setUploading(false);
+    } catch (err) {
+      console.error('Upload error', err);
+      alert('Something went wrong while uploading.');
+      setUploading(false);
+    }
   };
 
   const handleDownloadTemplate = () => {
     console.log('Downloading template');
-    // Create and download CSV template
   };
 
   return (
     <>
       <style>{styles}</style>
+      {uploading && (
+        <div className="loading-overlay">
+          <div className="loading-card">
+            <div className="spinner"></div>
+            <div className="loading-text">Uploading Files</div>
+            <div className="loading-subtext">Please wait while your files are being processed...</div>
+          </div>
+        </div>
+      )}
       <div className="container">
         <div className="header">
           <h1>Upload Allocations</h1>
@@ -545,7 +637,7 @@ export default function AllocationUpload() {
         </div>
 
         <div className="action-section">
-          <button 
+          <button
             className="action-btn action-primary"
             onClick={handleUpload}
             disabled={files.length === 0}
@@ -553,7 +645,7 @@ export default function AllocationUpload() {
             <Upload size={16} />
             Upload {files.length > 0 ? `(${files.length} file${files.length > 1 ? 's' : ''})` : 'Files'}
           </button>
-          <button 
+          <button
             className="action-btn action-secondary"
             onClick={() => setFiles([])}
             disabled={files.length === 0}

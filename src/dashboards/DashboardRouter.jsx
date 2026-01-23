@@ -27,7 +27,7 @@ const ROLE_DASHBOARD_MAP = {
   ROLE_SUPER_ADMIN: SuperAdminDashboard,
   ROLE_BANK_ADMIN: BankAdminDashboard,
   ROLE_VENDOR_ADMIN: VendorAdminDashboard,
-  ROLE_FIELD_EXECUTIVE: FEDashboard,
+  ROLE_FO: FEDashboard,
 };
 
 export default function DashboardRouter() {

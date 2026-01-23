@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, Trash2, Users, FileText, CheckCircle, Clock } from 'lucide-react';
 
 const styles = `
@@ -90,7 +90,7 @@ const styles = `
   }
 
   .list-container {
-    max-height: 450px;
+    max-height: 375px;
     overflow-y: auto;
   }
 
@@ -386,17 +386,74 @@ export default function CaseAssignment() {
   const [userSearch, setUserSearch] = useState('');
   const [showApiModal, setShowApiModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [cases, setCases] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [casesLoading, setCasesLoading] = useState(true);
+  const [usersLoading, setUsersLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCases();
+    fetchUsers();
+  }, []);
+
+  const fetchCases = async () => {
+    try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const response = await fetch('http://localhost:8080/api/allocations', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const formatted = data.map(item => ({
+          id: item.id,
+          name: item.allocationData?.['CUSTOMER NAME'] || 'N/A',
+          amount: item.allocationData?.['DISBURSED AMOUNT (IN CR)'] || '0',
+          status: item.status || 'Active',
+          loanNumber: item.loanNumber
+        }));
+        setCases(formatted);
+      }
+    } catch (err) {
+      console.error('Failed to fetch cases:', err);
+    } finally {
+      setCasesLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const response = await fetch('http://localhost:8080/api/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
 
   const assignedCaseIds = new Set(Object.values(assignments).flat().map(c => c.id));
-  const filteredCases = mockCases
+  const filteredCases = cases
     .filter(c => !assignedCaseIds.has(c.id))
     .filter(c =>
       c.name.toLowerCase().includes(caseSearch.toLowerCase()) ||
-      c.id.toLowerCase().includes(caseSearch.toLowerCase())
+      c.loanNumber?.toLowerCase().includes(caseSearch.toLowerCase())
     );
 
-  const filteredUsers = mockUsers.filter(u =>
-    u.name.toLowerCase().includes(userSearch.toLowerCase())
+  const filteredUsers = users.filter(u =>
+    u.fullName?.toLowerCase().includes(userSearch.toLowerCase()) ||
+    u.email?.toLowerCase().includes(userSearch.toLowerCase())
   );
 
   const assignCase = () => {
@@ -424,43 +481,45 @@ export default function CaseAssignment() {
   const totalAssigned = Object.values(assignments).flat().length;
   const usersWithCases = Object.keys(assignments).length;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (totalAssigned === 0) {
       alert('Please assign at least one case');
       return;
     }
-    setShowApiModal(true);
+    await confirmSubmit();
   };
 
   const confirmSubmit = async () => {
     setLoading(true);
-    
-    const payload = Object.entries(assignments).flatMap(([userId, cases]) =>
-      cases.map(caseItem => ({
-        userId: parseInt(userId),
-        allocationId: caseItem.id
-      }))
-    );
 
     try {
-      const response = await fetch('/api/assignments/assign', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (!token) throw new Error('Please login first');
 
-      if (response.ok) {
-        alert('Assignments submitted successfully!');
-        setAssignments({});
-        setSelectedCase(null);
-        setShowApiModal(false);
-      } else {
-        alert('Error submitting assignments');
+      // Submit each user's assignments
+      for (const [userId, cases] of Object.entries(assignments)) {
+        const allocationIds = cases.map(c => c.id);
+
+        const response = await fetch(`http://localhost:8080/api/manager/assign?userId=${userId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(allocationIds)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Assignment failed for user ${userId}`);
+        }
       }
+
+      alert('Assignments submitted successfully!');
+      setAssignments({});
+      setSelectedCase(null);
+      setShowApiModal(false);
     } catch (error) {
-      alert('Error submitting assignments: ' + error.message);
+      alert('Error: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -474,15 +533,12 @@ export default function CaseAssignment() {
   return (
     <>
       <style>{styles}</style>
-      
-      
 
       <div className="container">
         <div className="header">
           <h1>Case Assignment</h1>
           <p>Manage and assign recovery cases to your team members</p>
         </div>
-
 
         <div className="content-grid">
           <div className="panel">
@@ -511,7 +567,7 @@ export default function CaseAssignment() {
                     <div className="item-header">
                       <div>
                         <div className="item-title">{caseItem.name}</div>
-                        <div className="item-id">{caseItem.id}</div>
+                        <div className="item-id">{caseItem.loanNumber}</div>
                       </div>
                       <div className="item-amount">₹{caseItem.amount}</div>
                     </div>
@@ -521,8 +577,8 @@ export default function CaseAssignment() {
             ) : (
               <div className="all-assigned">
                 <div className="all-assigned-icon">✅</div>
-                <div className="all-assigned-text">All Cases Assigned</div>
-                <div className="all-assigned-desc">All available cases have been assigned</div>
+                <div className="all-assigned-text">{casesLoading ? 'Loading...' : 'All Cases Assigned'}</div>
+                <div className="all-assigned-desc">{casesLoading ? 'Fetching allocations...' : 'All available cases have been assigned'}</div>
               </div>
             )}
           </div>
@@ -551,8 +607,8 @@ export default function CaseAssignment() {
                 >
                   <div className="item-header">
                     <div>
-                      <div className="item-title">{user.name}</div>
-                      <div className="item-id">{user.role}</div>
+                      <div className="item-title">{user.fullName}</div>
+                      <div className="item-id">{user.email}</div>
                     </div>
                     <div className="badge">{assignments[user.id]?.length || 0}</div>
                   </div>
@@ -577,14 +633,14 @@ export default function CaseAssignment() {
               Case Assignments
             </div>
             <div className="assignment-grid">
-              {mockUsers
+              {users
                 .filter(u => assignments[u.id]?.length > 0)
                 .map(user => (
                   <div key={user.id} className="user-card">
                     <div className="user-header">
                       <div>
-                        <div className="user-name">{user.name}</div>
-                        <div className="user-role">{user.role}</div>
+                        <div className="user-name">{user.fullName}</div>
+                        <div className="user-role">{user.email}</div>
                       </div>
                       <div className="badge">{assignments[user.id]?.length}</div>
                     </div>
@@ -593,7 +649,7 @@ export default function CaseAssignment() {
                         <div key={caseItem.id} className="assignment-item">
                           <div className="assignment-info">
                             <div className="assignment-name">{caseItem.name}</div>
-                            <div className="assignment-id">{caseItem.id}</div>
+                            <div className="assignment-id">{caseItem.loanNumber}</div>
                           </div>
                           <button
                             className="btn-remove"
@@ -648,13 +704,13 @@ export default function CaseAssignment() {
             <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
               <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase' }}>Request Payload</div>
               <pre style={{ color: '#10b981', fontSize: '11px', overflow: 'auto' }}>
-{JSON.stringify(
-  Object.entries(assignments).flatMap(([userId, cases]) =>
-    cases.map(c => ({ userId: parseInt(userId), allocationId: c.id }))
-  ),
-  null,
-  2
-)}
+                {JSON.stringify(
+                  Object.entries(assignments).flatMap(([userId, cases]) =>
+                    cases.map(c => ({ userId: parseInt(userId), allocationId: c.id }))
+                  ),
+                  null,
+                  2
+                )}
               </pre>
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>

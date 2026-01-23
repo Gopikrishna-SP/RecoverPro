@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MapPin, FileText, CheckCircle, Clock, Camera, Phone, Navigation, Eye, Loader, X, ArrowRight } from 'lucide-react';
-import StartVisit from '../pages/StartVisit'; 
+import StartVisit from '../pages/StartVisit';
 
 const styles = `
   * {
@@ -1008,10 +1008,12 @@ export default function FieldExecutiveDashboard() {
 
       {showVisitModal && (
         <StartVisit
-          isOpen={showVisitModal}  // ✅ Correct
+          isOpen={showVisitModal}
           onClose={() => setShowVisitModal(false)}
-          loanNumber={selectedVisitData?.loanNumber}
-          address={selectedVisitData?.address}
+          loanData={{
+            loanNumber: selectedVisitData?.loanNumber,
+            address: selectedVisitData?.address
+          }}
         />
       )}
     </>

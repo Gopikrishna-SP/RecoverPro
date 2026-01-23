@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Download, Eye, Edit, Trash2 } from 'lucide-react';
+import { Search, Download, Eye, Loader } from 'lucide-react';
 
 const styles = `
   * {
@@ -124,14 +124,16 @@ const styles = `
   }
 
   .table-wrapper {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(71, 85, 105, 0.3);
+    background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
+    border: 1px solid rgba(71, 85, 105, 0.2);
     border-radius: 12px;
     overflow: hidden;
   }
 
   .table-container {
     overflow-x: auto;
+    max-height: 75vh;
+    overflow-y: auto;
   }
 
   table {
@@ -144,34 +146,34 @@ const styles = `
   thead {
     position: sticky;
     top: 0;
-    background: rgba(15, 23, 42, 0.9);
+    background: linear-gradient(135deg, #0a131f 0%, #0f1b2e 100%);
     z-index: 10;
   }
 
   th {
     text-align: left;
-    padding: 12px 10px;
+    padding: 14px 12px;
     font-size: 10px;
     font-weight: 700;
-    color: #cbd5e1;
-    border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+    color: #8b94a5;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.2);
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.5px;
     white-space: nowrap;
-    background: rgba(15, 23, 42, 0.95);
+    background: linear-gradient(135deg, #0a131f 0%, #0f1b2e 100%);
     min-width: 100px;
   }
 
   td {
-    padding: 10px;
-    font-size: 11px;
+    padding: 12px;
+    font-size: 12px;
     color: #cbd5e1;
-    border-bottom: 1px solid rgba(71, 85, 105, 0.1);
+    border-bottom: 1px solid rgba(71, 85, 105, 0.15);
     min-width: 100px;
   }
 
   tr:hover {
-    background: rgba(59, 130, 246, 0.05);
+    background: rgba(59, 130, 246, 0.08);
   }
 
   .currency {
@@ -196,19 +198,14 @@ const styles = `
     color: #6ee7b7;
   }
 
-  .badge.partial {
+  .badge.rtp {
     background: rgba(251, 146, 60, 0.2);
     color: #fdba74;
   }
 
-  .user-badge {
-    background: rgba(139, 92, 246, 0.2);
-    color: #d8b4fe;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 600;
-    display: inline-block;
+  .badge.nc-skip {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
   }
 
   .action-btns {
@@ -235,11 +232,6 @@ const styles = `
     color: #93c5fd;
   }
 
-  .action-btn.delete:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #fca5a5;
-  }
-
   .empty-state {
     padding: 48px 24px;
     text-align: center;
@@ -254,6 +246,14 @@ const styles = `
 
   .empty-state p {
     font-size: 13px;
+    color: #94a3b8;
+  }
+
+  .loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
     color: #94a3b8;
   }
 
@@ -293,8 +293,18 @@ const styles = `
     border-color: transparent;
   }
 
+  .error-msg {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+
   ::-webkit-scrollbar {
     width: 6px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
@@ -311,18 +321,18 @@ const styles = `
   }
 `;
 
-const ALL_COLUMNS = [
-  'id', 'segment', 'product', 'state', 'branch', 'location', 'loanNumber', 'customerName',
-  'posInCr', 'emi', 'bkt', 'visitDate', 'disp', 'projection',
-  'amount', 'ptpDate', 'reasonForDefault', 'contactability', 'residenceStatus',
-  'officeStatus', 'classificationCode', 'fieldUpdateFeedback', 'userId', 'createdBy', 'createdDate'
+const COLUMNS = [
+  'loanNumber', 'customerName', 'segment', 'product', 'location',
+  'visitDate', 'disp', 'contactability', 'residenceStatus', 'classificationCode',
+  'projection', 'amount', 'ptpDate', 'fieldUpdateFeedback'
 ];
 
-export default function VisitLog() {
+export default function MyVisit() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [visitLogs, setVisitLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -331,21 +341,34 @@ export default function VisitLog() {
 
   const fetchVisitLogs = async () => {
     try {
-      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-      const response = await fetch('http://localhost:8080/api/visit-logs/allocation/get-all', {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setError('Authentication token not found. Please login again.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('http://localhost:8080/api/visit-logs/my-visits', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
+
       if (response.ok) {
         const data = await response.json();
-        setVisitLogs(data);
+        setVisitLogs(Array.isArray(data) ? data : []);
+      } else if (response.status === 404) {
+        setVisitLogs([]);
       } else {
-        console.error('Failed to fetch visit logs');
+        throw new Error(`Server error ${response.status}`);
       }
     } catch (err) {
-      console.error('Failed to fetch visit logs:', err);
+      setError(`Failed to fetch visit logs: ${err.message}`);
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -355,10 +378,9 @@ export default function VisitLog() {
     if (!searchTerm) return visitLogs;
     const search = searchTerm.toLowerCase();
     return visitLogs.filter(item =>
-      item.loanNumber?.toLowerCase().includes(search) ||
-      item.customerName?.toLowerCase().includes(search) ||
-      item.createdBy?.toLowerCase().includes(search) ||
-      item.userId?.toString().toLowerCase().includes(search)
+      (item.loanNumber?.toLowerCase().includes(search)) ||
+      (item.customerName?.toLowerCase().includes(search)) ||
+      (item.location?.toLowerCase().includes(search))
     );
   }, [searchTerm, visitLogs]);
 
@@ -368,9 +390,9 @@ export default function VisitLog() {
 
   const handleExport = () => {
     const csv = [
-      ALL_COLUMNS.join(','),
+      COLUMNS.join(','),
       ...paginatedData.map(row =>
-        ALL_COLUMNS.map(col => {
+        COLUMNS.map(col => {
           const val = row[col];
           return typeof val === 'string' ? `"${val || ''}"` : (val || '');
         }).join(',')
@@ -380,14 +402,21 @@ export default function VisitLog() {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
-    link.setAttribute('download', `visit_log_${Date.now()}.csv`);
+    link.setAttribute('download', `my_visit_log_${Date.now()}.csv`);
     link.style.visibility = 'hidden';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const getBadgeClass = (disp) => {
+    if (disp === 'PAID') return 'badge paid';
+    if (disp === 'RTP') return 'badge rtp';
+    if (disp === 'NC_SKIP') return 'badge nc-skip';
+    return 'badge';
   };
 
   return (
@@ -395,9 +424,11 @@ export default function VisitLog() {
       <style>{styles}</style>
       <div className="container">
         <div className="header">
-          <h1>Visit Log</h1>
-          <p>Track all customer visits with comprehensive details</p>
+          <h1>My Visit Logs</h1>
+          <p>Track your field visits and collection activities</p>
         </div>
+
+        {error && <div className="error-msg">{error}</div>}
 
         <div className="controls">
           <div className="search-box">
@@ -405,7 +436,7 @@ export default function VisitLog() {
             <input
               type="text"
               className="search-input"
-              placeholder="Search by loan number, customer name, or user..."
+              placeholder="Search by loan number, customer name, or location..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -420,7 +451,7 @@ export default function VisitLog() {
 
         <div className="stats-bar">
           <div className="stat-info">
-            Total: <strong>{filteredData.length}</strong> visits
+            Total Visits: <strong>{filteredData.length}</strong>
           </div>
           <div className="stat-info">
             Page: <strong>{currentPage}</strong> of <strong>{totalPages || 1}</strong>
@@ -430,16 +461,16 @@ export default function VisitLog() {
         <div className="table-wrapper">
           <div className="table-container">
             {loading ? (
-              <div className="empty-state">
-                <h3>Loading...</h3>
-                <p>Fetching visit logs...</p>
+              <div className="loading-state">
+                <Loader size={32} />
+                <span style={{ marginLeft: '12px' }}>Loading your visit logs...</span>
               </div>
             ) : paginatedData.length > 0 ? (
               <table>
                 <thead>
                   <tr>
-                    {ALL_COLUMNS.map(col => (
-                      <th key={col}>{col}</th>
+                    {COLUMNS.map(col => (
+                      <th key={col}>{col.replace(/([A-Z])/g, ' $1').trim()}</th>
                     ))}
                     <th>Actions</th>
                   </tr>
@@ -447,29 +478,21 @@ export default function VisitLog() {
                 <tbody>
                   {paginatedData.map((row, idx) => (
                     <tr key={row.id || idx}>
-                      {ALL_COLUMNS.map(col => (
+                      {COLUMNS.map(col => (
                         <td key={`${idx}-${col}`} title={row[col] || '-'}>
-                          {col === 'amount' || col === 'emi' || col === 'posInCr'
+                          {col === 'amount'
                             ? <span className="currency">₹{typeof row[col] === 'number' ? row[col].toLocaleString() : row[col] || '-'}</span>
-                            : col === 'visitDate' || col === 'ptpDate' || col === 'createdDate'
+                            : col === 'visitDate' || col === 'ptpDate'
                             ? <span className="date">{row[col] || '-'}</span>
                             : col === 'disp'
-                            ? <span className={`badge ${row[col]?.toLowerCase()}`}>{row[col] || '-'}</span>
-                            : col === 'createdBy' || col === 'userId'
-                            ? <span className="user-badge">{row[col] || '-'}</span>
+                            ? <span className={getBadgeClass(row[col])}>{row[col] || '-'}</span>
                             : row[col] || '-'}
                         </td>
                       ))}
                       <td>
                         <div className="action-btns">
-                          <button className="action-btn" title="View">
+                          <button className="action-btn" title="View Details">
                             <Eye size={12} />
-                          </button>
-                          <button className="action-btn" title="Edit">
-                            <Edit size={12} />
-                          </button>
-                          <button className="action-btn delete" title="Delete">
-                            <Trash2 size={12} />
                           </button>
                         </div>
                       </td>
@@ -479,8 +502,8 @@ export default function VisitLog() {
               </table>
             ) : (
               <div className="empty-state">
-                <h3>No visits found</h3>
-                <p>Try adjusting your search criteria</p>
+                <h3>No visit logs found</h3>
+                <p>Start recording your field visits to see them here</p>
               </div>
             )}
           </div>
