@@ -1,0 +1,20 @@
+:root {
+  /* Neutrals */
+  --bg: #f8fafc;          /* page background */
+  --surface: #ffffff;     /* cards, panels */
+  --border: #e5e7eb;      /* subtle borders */
+
+  /* Text */
+  --text-primary: #334155;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+
+  /* Brand / action */
+  --primary: #2563eb;     /* blue = trust */
+  --primary-hover: #1d4ed8;
+
+  /* Status */
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+}

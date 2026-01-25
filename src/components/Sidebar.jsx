@@ -1,23 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, FileText, BarChart3, Settings, ChevronDown, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Sidebar({ collapsed, onToggle }) {
   const [expandedMenu, setExpandedMenu] = useState(null);
+  const [userRoles, setUserRoles] = useState([]);
   const navigate = useNavigate();
 
+  // Extract roles from JWT token
+  const decodeTokenAndSetRoles = () => {
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token') || sessionStorage.getItem('token');
+    
+    if (token) {
+      try {
+        // Decode JWT
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        
+        const decoded = JSON.parse(jsonPayload);
+        console.log('Decoded Token:', decoded);
+        console.log('User Roles:', decoded.roles);
+        
+        // Set roles from token
+        if (decoded.roles && Array.isArray(decoded.roles)) {
+          setUserRoles(decoded.roles);
+        }
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
+  };
+
+  // Run on mount and when token changes
+  useEffect(() => {
+    decodeTokenAndSetRoles();
+
+    // Listen for storage changes (when user logs in from another tab)
+    const handleStorageChange = () => {
+      console.log('Token changed, updating sidebar...');
+      decodeTokenAndSetRoles();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Check for token changes every 500ms
+    const interval = setInterval(() => {
+      decodeTokenAndSetRoles();
+    }, 500);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Check if user has required role
+  const hasRole = (requiredRoles) => {
+    if (!requiredRoles) return true;
+    if (!Array.isArray(requiredRoles)) {
+      requiredRoles = [requiredRoles];
+    }
+    return requiredRoles.some(role => userRoles.includes(role));
+  };
+
+  // Filter submenu items based on user roles
+  const getFilteredSubItems = (subItems) => {
+    return subItems.filter(item => {
+      if (!item.requiredRoles) return true;
+      return hasRole(item.requiredRoles);
+    });
+  };
+
   const handleMenuClick = (index, defaultPath) => {
-    // Toggle expansion
     setExpandedMenu(expandedMenu === index ? null : index);
-    // Navigate to default path if menu has one
     if (defaultPath) {
       navigate(defaultPath);
     }
   };
 
   const handleSignOut = () => {
-    console.log('Sign out');
-    // Add actual sign out logic here
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    navigate('/login');
   };
 
   const handleSignOutClick = () => {
@@ -33,40 +103,86 @@ export default function Sidebar({ collapsed, onToggle }) {
       icon: Home,
       label: 'Home',
       defaultPath: '/dashboard',
+      requiredRoles: null,
       subItems: [
-        { label: 'Dashboard', path: '/dashboard' },
-        { label: 'Create Account', path: '/dashboard/create-account' },
-        { label: 'Broadcast', path: '/dashboard/broadcast' }
+        { 
+          label: 'Dashboard', 
+          path: '/dashboard',
+          requiredRoles: null
+        },
+        { 
+          label: 'Create Account', 
+          path: '/dashboard/create-account',
+          requiredRoles: ['ROLE_SUPER_ADMIN']
+        },
+        { 
+          label: 'Broadcast', 
+          path: '/dashboard/broadcast',
+          requiredRoles: ['ROLE_SUPER_ADMIN', 'ROLE_BANK_ADMIN']
+        }
       ]
     },
     {
       icon: FileText,
       label: 'Loans',
       defaultPath: '/loans/allocation',
+      requiredRoles: ['ROLE_BANK_ADMIN', 'ROLE_VENDOR_ADMIN'],
       subItems: [
-        { label: 'Allocation', path: '/loans/allocation' },
-        { label: 'Assign Case', path: '/loans/assign' },
-        { label: 'Upload', path: '/loans/upload' }
+        { 
+          label: 'Allocation', 
+          path: '/loans/allocation',
+          requiredRoles: ['ROLE_BANK_ADMIN', 'ROLE_VENDOR_ADMIN']
+        },
+        { 
+          label: 'Assign Case', 
+          path: '/loans/assign',
+          requiredRoles: ['ROLE_BANK_ADMIN', 'ROLE_VENDOR_ADMIN']
+        },
+        { 
+          label: 'Upload', 
+          path: '/loans/upload',
+          requiredRoles: ['ROLE_BANK_ADMIN', 'ROLE_VENDOR_ADMIN']
+        }
       ]
     },
     {
       icon: BarChart3,
       label: 'Visits',
       defaultPath: '/visits/log',
+      requiredRoles: ['ROLE_BANK_ADMIN', 'ROLE_VENDOR_ADMIN', 'ROLE_FO'],
       subItems: [
-        { label: 'Visit Log', path: '/visits/log' },
-        { label: 'My Visit', path: '/visits/my-visit' }
+        { 
+          label: 'Visit Log', 
+          path: '/visits/log',
+          requiredRoles: ['ROLE_BANK_ADMIN', 'ROLE_VENDOR_ADMIN']
+        },
+        { 
+          label: 'My Visit', 
+          path: '/visits/my-visit',
+          requiredRoles: ['ROLE_FO', 'ROLE_VENDOR_ADMIN']
+        }
       ]
     },
     {
       icon: Settings,
       label: 'Settings',
       defaultPath: '/settings/password',
+      requiredRoles: null,
       subItems: [
-        { label: 'Change Password', path: '/settings/password' }
+        { 
+          label: 'Change Password', 
+          path: '/settings/password',
+          requiredRoles: null
+        }
       ]
-    },
+    }
   ];
+
+  // Filter menu items based on roles
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!item.requiredRoles) return true;
+    return hasRole(item.requiredRoles);
+  });
 
   return (
     <>
@@ -84,8 +200,8 @@ export default function Sidebar({ collapsed, onToggle }) {
 
         .sidebar {
           width: 230px;
-          background: rgba(15, 23, 42, 0.8);
-          border-right: 1px solid #2a3f52;
+          background: #ffffff;
+          border-right: 1px solid #e5e7eb;
           padding: 24px 0 0 0;
           display: flex;
           flex-direction: column;
@@ -96,7 +212,8 @@ export default function Sidebar({ collapsed, onToggle }) {
           transition: width 220ms ease;
           will-change: width;
           overflow-y: auto;
-          box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05);
+          box-shadow: none;
+          z-index: 1000;
         }
 
         .sidebar.collapsed {
@@ -123,6 +240,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           display: flex;
           align-items: center;
           justify-content: center;
+          background-color: #00A550;
           color: #fff;
           flex-shrink: 0;
         }
@@ -131,7 +249,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           transition: opacity 150ms ease;
           font-weight: 700;
           font-size: 1.2rem;
-          background: linear-gradient(90deg, #60a5fa 0%, #22d3ee 100%);
+          background-color: #334155;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -158,7 +276,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           align-items: center;
           gap: 12px;
           padding: 14px 24px;
-          color: #8b94a5;
+          color: #475569;
           font-size: 14px;
           font-weight: 500;
           cursor: pointer;
@@ -168,15 +286,15 @@ export default function Sidebar({ collapsed, onToggle }) {
         }
 
         .menu-item:hover {
-          background: rgba(59, 130, 246, 0.1);
-          color: #60a5fa;
-          border-left-color: #22d3ee;
+          background-color: #f1f5f9;
+          color: #2563eb;
+          border-left-color: #2563eb;
         }
 
         .menu-item.active {
-          background: rgba(59, 130, 246, 0.15);
-          color: #60a5fa;
-          border-left-color: #22d3ee;
+          background-color: #eff6ff;
+          color: #2563eb;
+          border-left-color: #2563eb;
         }
 
         .menu-item-left {
@@ -213,7 +331,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         }
 
         .submenu {
-          background: rgba(10, 25, 47, 0.6);
+          background: #f8fafc;
           padding: 0;
           max-height: 0;
           overflow: hidden;
@@ -226,7 +344,7 @@ export default function Sidebar({ collapsed, onToggle }) {
 
         .submenu-item {
           padding: 10px 24px 10px 48px;
-          color: #6b7a8a;
+          color: #64748b;
           font-size: 13px;
           cursor: pointer;
           transition: all 0.2s ease-in-out;
@@ -234,9 +352,9 @@ export default function Sidebar({ collapsed, onToggle }) {
         }
 
         .submenu-item:hover {
-          background: rgba(59, 130, 246, 0.1);
-          color: #60a5fa;
-          border-left-color: #22d3ee;
+          background: #e0f2fe;
+          color: #2563eb;
+          border-left-color: #2563eb;
         }
 
         .sidebar.collapsed .submenu {
@@ -245,7 +363,7 @@ export default function Sidebar({ collapsed, onToggle }) {
 
         .sidebar-footer {
           padding: 16px 20px 24px 20px;
-          border-top: 1px solid #2a3f52;
+          border-top: 1px solid #e5e7eb;
           margin-top: auto;
         }
 
@@ -258,7 +376,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           background: none;
           border: none;
           border-radius: 8px;
-          color: #8b94a5;
+          color: #475569;
           font-size: 14px;
           font-weight: 600;
           cursor: pointer;
@@ -266,8 +384,8 @@ export default function Sidebar({ collapsed, onToggle }) {
         }
 
         .signout-btn:hover {
-          color: #ef4444;
-          background: rgba(239, 68, 68, 0.1);
+          color: #dc2626;
+          background: #fee2e2;
         }
 
         .signout-btn svg {
@@ -302,12 +420,12 @@ export default function Sidebar({ collapsed, onToggle }) {
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(148,163,184,0.4);
           border-radius: 3px;
         }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.15);
+          background: rgba(148,163,184,0.6);
         }
       `}</style>
 
@@ -323,50 +441,38 @@ export default function Sidebar({ collapsed, onToggle }) {
         >
           <div className="logo-icon">
             <svg
-              viewBox="0 0 229 229"
               xmlns="http://www.w3.org/2000/svg"
-              width="28"
-              height="28"
-              shapeRendering="geometricPrecision"
+              viewBox="0 0 229 229"
+              width="16"
+              height="16"
+              shape-rendering="geometricPrecision"
             >
-              <defs>
-                <clipPath id="diagBlue">
-                  <polygon points="0,0 229,0 0,229" />
-                </clipPath>
-                <clipPath id="diagTeal">
-                  <polygon points="229,0 229,229 0,229" />
-                </clipPath>
-              </defs>
-
               <path
                 d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
-            c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
-            c-21.7,0-40.2-7.7-55.5-23l26.5-26.3
-            c-15.3-15.3-23-33.8-23-55.5s7.7-40.2,23-55.6
-            c15.3-15.3,33.8-23,55.5-23c21.6,0,40.1,7.7,55.5,23z"
-                clipPath="url(#diagBlue)"
-                fill="#2563EB"
+         c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
+         c-21.7,0-40.2-7.7-55.5-23l26.5-26.3
+         c-15.3-15.3-23-33.8-23-55.5s7.7-40.2,23-55.6
+         c15.3-15.3,33.8-23,55.5-23c21.6,0,40.1,7.7,55.5,23z"
+                fill="#FFFFFF"
               />
 
-              <path
-                d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
-            c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
-            c-21.7,0-40.2-7.7-55.5-23l26.5-26.3
-            c-15.3-15.3-23-33.8-23-55.5s7.7-40.2,23-55.6
-            c15.3-15.3,33.8-23,55.5-23c21.6,0,40.1,7.7,55.5,23z"
-                clipPath="url(#diagTeal)"
-                fill="#14B8A6"
+              <line
+                x1="40"
+                y1="189"
+                x2="189"
+                y2="40"
+                stroke="#FFFFFF"
+                strokeWidth="16"
+                strokeLinecap="round"
               />
             </svg>
           </div>
           <span
             className="logo-text"
             style={{
-              fontWeight: 'bold',
-              fontSize: '1.2rem',
-              background: 'linear-gradient(90deg, #2563EB 50%, #14B8A6 50%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              fontWeight: "bold",
+              fontSize: "1.1rem",
+              color: "#334155",
             }}
           >
             RecoverPro
@@ -374,35 +480,38 @@ export default function Sidebar({ collapsed, onToggle }) {
         </div>
 
         <div className="menu-section">
-          {menuItems.map((item, index) => (
-            <div key={index}>
-              <div
-                className={`menu-item ${expandedMenu === index ? 'active expanded' : ''}`}
-                onClick={() => handleMenuClick(index, item.defaultPath)}
-              >
-                <div className="menu-item-left">
-                  <div className="menu-item-icon">
-                    <item.icon size={20} />
+          {filteredMenuItems.map((item, index) => {
+            const filteredSubItems = getFilteredSubItems(item.subItems);
+            return (
+              <div key={index}>
+                <div
+                  className={`menu-item ${expandedMenu === index ? 'active expanded' : ''}`}
+                  onClick={() => handleMenuClick(index, item.defaultPath)}
+                >
+                  <div className="menu-item-left">
+                    <div className="menu-item-icon">
+                      <item.icon size={20} />
+                    </div>
+                    <span>{item.label}</span>
                   </div>
-                  <span>{item.label}</span>
+                  <div className="chevron-icon">
+                    <ChevronDown size={16} />
+                  </div>
                 </div>
-                <div className="chevron-icon">
-                  <ChevronDown size={16} />
+                <div className={`submenu ${expandedMenu === index ? 'open' : ''}`}>
+                  {filteredSubItems.map((subItem, subIndex) => (
+                    <div
+                      key={subIndex}
+                      className="submenu-item"
+                      onClick={() => navigate(subItem.path)}
+                    >
+                      {subItem.label}
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className={`submenu ${expandedMenu === index ? 'open' : ''}`}>
-                {item.subItems.map((subItem, subIndex) => (
-                  <div
-                    key={subIndex}
-                    className="submenu-item"
-                    onClick={() => navigate(subItem.path)}
-                  >
-                    {subItem.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="sidebar-footer">

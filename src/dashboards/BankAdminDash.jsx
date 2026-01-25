@@ -10,9 +10,9 @@ const styles = `
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #0f172a 0%, #1a1f35 50%, #0f172a 100%);
+    background-color: #f8fafc;
     min-height: 100vh;
-    color: #e2e8f0;
+    color: #334155;
   }
 
   .container {
@@ -28,13 +28,13 @@ const styles = `
   .header h1 {
     font-size: 36px;
     font-weight: 700;
-    color: #ffffff;
+    color: #0f172a;
     margin-bottom: 8px;
   }
 
   .header p {
     font-size: 14px;
-    color: #94a3b8;
+    color: #64748b;
   }
 
   .stats-grid {
@@ -45,17 +45,18 @@ const styles = `
   }
 
   .stat-card {
-    background: rgba(30, 41, 59, 0.5);
+    background-color: #ffffff;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(71, 85, 105, 0.3);
+    border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 24px;
     transition: all 0.3s ease;
   }
 
   .stat-card:hover {
-    border-color: rgba(59, 130, 246, 0.5);
-    background: rgba(30, 41, 59, 0.8);
+    border-color: #2563eb;
+    background: #f1f5f9;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
   }
 
   .stat-content {
@@ -67,7 +68,7 @@ const styles = `
   .stat-info p:first-child {
     font-size: 12px;
     font-weight: 600;
-    color: #cbd5e1;
+    color: #64748b;
     margin-bottom: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -76,7 +77,7 @@ const styles = `
   .stat-info p:last-child {
     font-size: 32px;
     font-weight: 700;
-    color: #ffffff;
+    color: #0f172a;
   }
 
   .stat-icon {
@@ -109,9 +110,9 @@ const styles = `
   .tabs {
     display: flex;
     gap: 4px;
-    background: rgba(30, 41, 59, 0.3);
+    background: #ffffff;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(71, 85, 105, 0.3);
+    border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 6px;
     width: fit-content;
@@ -122,7 +123,7 @@ const styles = `
     padding: 10px 24px;
     border: none;
     background: transparent;
-    color: #cbd5e1;
+    color: #64748b;
     font-size: 14px;
     font-weight: 500;
     border-radius: 8px;
@@ -131,12 +132,12 @@ const styles = `
   }
 
   .tab-btn.active {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background-color: #2563eb;
     color: white;
   }
 
   .tab-btn:hover:not(.active) {
-    color: #ffffff;
+    color: #0f172a;
   }
 
   .content-grid {
@@ -146,9 +147,9 @@ const styles = `
   }
 
   .card {
-    background: rgba(30, 41, 59, 0.5);
+    background: #ffffff;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(71, 85, 105, 0.3);
+    border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 24px;
   }
@@ -156,12 +157,13 @@ const styles = `
   .card h3 {
     font-size: 18px;
     font-weight: 600;
-    color: #ffffff;
+    color: #0f172a;
     margin-bottom: 16px;
   }
 
   .table-container {
     overflow-x: auto;
+    border-radius: 8px;
   }
 
   table {
@@ -174,21 +176,22 @@ const styles = `
     padding: 12px;
     font-size: 12px;
     font-weight: 600;
-    color: #cbd5e1;
-    border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+    color: #64748b;
+    border-bottom: 1px solid #e5e7eb;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    background-color: #f8fafc;
   }
 
   td {
     padding: 14px 12px;
     font-size: 14px;
-    color: #cbd5e1;
-    border-bottom: 1px solid rgba(71, 85, 105, 0.1);
+    color: #334155;
+    border-bottom: 1px solid #e5e7eb;
   }
 
   tr:hover {
-    background: rgba(59, 130, 246, 0.05);
+    background: #f8fafc;
   }
 
   .status-badge {
@@ -201,23 +204,23 @@ const styles = `
 
   .status-active {
     background: rgba(16, 185, 129, 0.2);
-    color: #6ee7b7;
+    color: #059669;
   }
 
   .status-pending {
     background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
+    color: #d97706;
   }
 
   .status-rejected {
     background: rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
+    color: #dc2626;
   }
 
   .action-btn {
     background: none;
     border: none;
-    color: #60a5fa;
+    color: #2563eb;
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 4px;
@@ -226,11 +229,12 @@ const styles = `
     align-items: center;
     gap: 4px;
     font-size: 12px;
+    font-weight: 600;
   }
 
   .action-btn:hover {
-    background: rgba(59, 130, 246, 0.1);
-    color: #93c5fd;
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
   }
 
   @media (max-width: 1024px) {
@@ -239,6 +243,18 @@ const styles = `
     }
     .content-grid {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+    .container {
+      padding: 16px;
+    }
+    .header h1 {
+      font-size: 28px;
     }
   }
 `;

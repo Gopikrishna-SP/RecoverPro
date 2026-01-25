@@ -9,83 +9,46 @@ const Logo = () => {
           flex-shrink: 0;
         }
         .logo-text {
-          margin-left: 10px;
+          margin-left: 4px;
         }
       `}</style>
 
-      <div className="logo-icon">
-        <svg
-        viewBox="0 0 229 229"
-        xmlns="http://www.w3.org/2000/svg"
-        width="28"
-        height="28"
-        shapeRendering="geometricPrecision"
-        >
-        <defs>
-            <clipPath id="shieldClip">
+      <div className="logo-icon" style={{ gap: "4px" }}>
+        <div style={{ background: "#00A550", padding: "3px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 229 229"
+            width="16"
+            height="16"
+            shape-rendering="geometricPrecision"
+          >
             <path
-                d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
-                c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
-                c-21.7,0-40.2-7.7-55.5-23l26.5-26.3
-                c-15.3-15.3-23-33.8-23-55.5s7.7-40.2,23-55.6
-                c15.3-15.3,33.8-23,55.5-23c21.6,0,40.1,7.7,55.5,23z"
+              d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
+         c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
+         c-21.7,0-40.2-7.7-55.5-23l26.5-26.3
+         c-15.3-15.3-23-33.8-23-55.5s7.7-40.2,23-55.6
+         c15.3-15.3,33.8-23,55.5-23c21.6,0,40.1,7.7,55.5,23z"
+              fill="#FFFFFF"
             />
-            </clipPath>
 
-            {/* Inset shield clip (prevents bleed) */}
-        <clipPath id="shieldClipInset">
-        <path
-            d="M180.4,48.9l-24.5,24.5c14.2,14.2,21.4,31.6,21.4,51.1
-            c0,19.9-7.2,37.1-21.4,51.3c-14.2,14.2-31.6,21.4-51.1,21.4
-            c-19.9,0-37.1-7.2-51.3-21.4l24.5-24.3
-            c-14.2-14.2-21.4-31.6-21.4-51.3s7.2-37.1,21.4-51.3
-            c14.2-14.2,31.6-21.4,51.3-21.4c19.7,0,37.1,7.2,51.1,21.4z"
-        />
-        </clipPath>
-
-
-            <clipPath id="diagBlue">
-            <polygon points="0,0 229,0 0,229" />
-            </clipPath>
-
-            <clipPath id="diagTeal">
-            <polygon points="229,0 229,229 0,229" />
-            </clipPath>
-        </defs>
-
-        {/* BLUE HALF */}
-        <path
-            d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
-            c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
-            c-21.7,0-40.2-7.7-55.5-23l26.5-26.3
-            c-15.3-15.3-23-33.8-23-55.5s7.7-40.2,23-55.6
-            c15.3-15.3,33.8-23,55.5-23c21.6,0,40.1,7.7,55.5,23z"
-            clipPath="url(#diagBlue)"
-            fill="#2563EB"
-        />
-
-        {/* TEAL HALF */}
-        <path
-            d="M183.4,45.9l-26.5,26.5c15.4,15.3,23.2,33.8,23.2,55.5
-            c0,21.7-7.7,40.2-23.2,55.5c-15.3,15.3-33.8,23-55.3,23
-            c-21.7,0-40.2-7.7-55.5-23l26.5-26.3
-            c-15.3-15.3-23-33.8-23-55.5s7.7-40.2,23-55.6
-            c15.3-15.3,33.8-23,55.5-23c21.6,0,40.1,7.7,55.5,23z"
-            clipPath="url(#diagTeal)"
-            fill="#14B8A6"
-        />
-        </svg>
-
-
+            <line
+              x1="40"
+              y1="189"
+              x2="189"
+              y2="40"
+              stroke="#FFFFFF"
+              strokeWidth="16"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
 
         <span
           className="logo-text"
           style={{
             fontWeight: "bold",
-            fontSize: "1.2rem",
-            background: "linear-gradient(90deg, #2563EB 50%, #14B8A6 50%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            fontSize: "1.1rem",
+            color: "#334155",
           }}
         >
           RecoverPro

@@ -89,9 +89,9 @@ export default function SigninPage() {
         .signin-container {
           width: 100%;
           max-width: 420px;
-          background: rgba(30, 40, 50, 0.8);
+          background: var(--surface);
           backdrop-filter: blur(10px);
-          border: 1px solid #2d3748;
+          border: 1px solid var(--border);
           border-radius: 12px;
           padding: 40px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -104,14 +104,14 @@ export default function SigninPage() {
         .signin-title {
           font-size: 28px;
           font-weight: 700;
-          color: #e5e7eb;
+          color: var(--text-primary);
           margin-bottom: 8px;
           letter-spacing: -0.5px;
         }
 
         .signin-subtitle {
           font-size: 14px;
-          color: #a0aec0;
+          color: var(--text-secondary);
           font-weight: 400;
           line-height: 1.5;
         }
@@ -122,9 +122,9 @@ export default function SigninPage() {
 
         .form-label {
           display: block;
-          font-size: 12px;
+          font-size: 10px;
           font-weight: 600;
-          color: #cbd5e0;
+          color: #var(--text-secondary);
           margin-bottom: 8px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -139,7 +139,7 @@ export default function SigninPage() {
         .form-input-icon {
           position: absolute;
           left: 12px;
-          color: #718096;
+          color: var(--text-muted);
           display: flex;
           align-items: center;
           pointer-events: none;
@@ -149,22 +149,22 @@ export default function SigninPage() {
           width: 100%;
           padding: 11px 12px 11px 40px;
           border-radius: 8px;
-          border: 1px solid #4a5568;
-          background: rgba(55, 65, 81, 0.4);
+          border: 1px solid var(--border);
+          background: var(--surface);
           font-size: 14px;
-          color: #e5e7eb;
+          color: var(--text-primary);
           font-family: 'Inter', sans-serif;
           transition: all 0.3s ease;
         }
 
         .form-input::placeholder {
-          color: #718096;
+          color: var(--text-muted);
         }
 
         .form-input:focus {
           outline: none;
-          border-color: #2563EB;
-          background: rgba(55, 65, 81, 0.6);
+          border-color: var(--primary);
+          background: var(--surface);
           box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
@@ -176,42 +176,28 @@ export default function SigninPage() {
           margin-top: 12px;
         }
 
-        .forgot-password {
-          text-align: right;
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          margin-bottom: 24px;
+          margin-top: 12px;
         }
 
-        .forgot-password a {
-          font-size: 12px;
-          color: #2563EB;
+        .forgot-password {
+          font-size: 13px;
+          color: var(--primary);
           text-decoration: none;
           font-weight: 600;
-          transition: color 0.2s;
+          transition: color 0.3s ease;
         }
 
-        .forgot-password a:hover {
-          color: #1e40af;
+        .forgot-password:hover {
+          color: var(--primary-hover);
           text-decoration: underline;
         }
 
-        .remember-me {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
 
-        .remember-me input {
-          width: 16px;
-          height: 16px;
-          cursor: pointer;
-          accent-color: #2563EB;
-        }
-
-        .remember-me label {
-          font-size: 12px;
-          color: #a0aec0;
-          cursor: pointer;
-          margin: 0;
-        }
 
         .alert {
           padding: 12px;
@@ -222,8 +208,8 @@ export default function SigninPage() {
         }
 
         .alert-danger {
-          background: rgba(220, 38, 38, 0.1);
-          color: #fca5a5;
+          background: rgba(220, 38, 38, 0.1) /* keep as-is OR later make var */;
+          color: #fca5a5 /* keep for now */;
           border-color: #7f1d1d;
         }
 
@@ -232,7 +218,7 @@ export default function SigninPage() {
           padding: 12px 16px;
           border: none;
           border-radius: 8px;
-          background: linear-gradient(135deg, #2563EB 0%, #1e40af 100%);
+          background: linear-gradient(135deg, #00A550 0%, #00A550 100%);
           color: #fff;
           font-size: 14px;
           font-weight: 700;
@@ -257,7 +243,7 @@ export default function SigninPage() {
           display: flex;
           align-items: center;
           margin: 24px 0;
-          color: #4a5568;
+          color: var(--border);
           font-size: 12px;
         }
 
@@ -266,7 +252,7 @@ export default function SigninPage() {
           content: '';
           flex: 1;
           height: 1px;
-          background: #4a5568;
+          background: var(--border);
         }
 
         .signin-divider span {
@@ -275,12 +261,12 @@ export default function SigninPage() {
 
         .signin-footer {
           text-align: center;
-          color: #a0aec0;
+          color: var(--text-secondary);
           font-size: 12px;
         }
 
         .signin-footer a {
-          color: #2563EB;
+          color: var(--primary);
           text-decoration: none;
           font-weight: 600;
         }
@@ -296,7 +282,7 @@ export default function SigninPage() {
           }
 
           .signin-title {
-            font-size: 24px;
+            font-size: 22px;
           }
 
           .form-input {
@@ -321,7 +307,7 @@ export default function SigninPage() {
           <div className="form-group">
             <label className="form-label">Work Email</label>
             <div className="form-input-wrapper">
-              <Mail size={18} className="form-input-icon" />
+              <Mail size={14} className="form-input-icon" />
               <input
                 type="email"
                 className="form-input"
@@ -337,11 +323,11 @@ export default function SigninPage() {
           <div className="form-group">
             <label className="form-label">Password</label>
             <div className="form-input-wrapper">
-              <Lock size={18} className="form-input-icon" />
+              <Lock size={14} className="form-input-icon" />
               <input
                 type="password"
                 className="form-input"
-                placeholder="••••••••"
+                placeholder="••••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -351,18 +337,9 @@ export default function SigninPage() {
           </div>
 
           <div className="form-actions">
-            <div className="remember-me">
-              <input
-                type="checkbox"
-                id="remember"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              <label htmlFor="remember">Remember me</label>
-            </div>
-            <div className="forgot-password">
-              <a href="#reset">Reset password?</a>
-            </div>
+            <a href="#forgot" style={{ fontSize: '13px', color: 'var(--primary)', textDecoration: 'none', fontWeight: '600' }}>
+              Forgot password?
+            </a>
           </div>
 
           {error && <div className="alert alert-danger">{error}</div>}

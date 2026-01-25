@@ -134,7 +134,7 @@ export default function ProfileDropdown() {
         }
 
         body {
-          background: #0f172a;
+          background: inherit;
         }
 
         .profile-wrapper {
@@ -155,19 +155,16 @@ export default function ProfileDropdown() {
           backdrop-filter: blur(10px);
         }
 
-        .profile-trigger:hover {
-          background: rgba(96, 165, 250, 0.1);
-        }
 
         .profile-pic {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+          background: linear-gradient(135deg, #007A3D 0%, #00A550 45%, #5EF3A2 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #fff;
+          color: #ffffff;
           font-weight: 600;
           font-size: 15px;
           flex-shrink: 0;
@@ -176,28 +173,29 @@ export default function ProfileDropdown() {
         .profile-info {
           display: flex;
           flex-direction: column;
+          align-items: flex-start;
           gap: 2px;
         }
 
         .profile-name {
-          font-size: 14px;
+          font-size: 16px;
           font-weight: 600;
-          color: #f0f4f8;
+          color: #0f172a;
         }
 
         .profile-role {
           font-size: 12px;
-          color: #8b94a5;
+          color: #64748b;
         }
 
         .profile-dropdown {
           position: fixed;          
           top: 16px;                
           right: 16px;      
-          background: linear-gradient(135deg, #1a2332 0%, #151e2b 100%);
-          border: 1px solid rgba(42, 63, 82, 0.8);
-          border-radius: 12px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4),
+          background-color: #ffffff;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 20px 40px rgba(15,23,42,.15),
           inset 0 1px 0 rgba(255, 255, 255, 0.05);
           z-index: 1000;
           width: 340px;
@@ -229,11 +227,11 @@ export default function ProfileDropdown() {
           width: 80px;
           height: 80px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+          background: linear-gradient(135deg, #007A3D 0%, #00A550 45%, #5EF3A2 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #fff;
+          color: #ffffff;
           font-size: 32px;
           font-weight: 700;
           flex-shrink: 0;
@@ -248,28 +246,28 @@ export default function ProfileDropdown() {
         .profile-name-large {
           font-size: 16px;
           font-weight: 700;
-          color: #f0f4f8;
+          color: #0f172a;
           margin-bottom: 4px;
         }
 
         .profile-badge {
           display: inline-block;
           padding: 4px 10px;
-          background: rgba(34, 197, 94, 0.15);
-          color: #4ade80;
+          background: #dcfce7;
+          color: #16a34a;
           border-radius: 6px;
           font-size: 11px;
           font-weight: 600;
           margin-top: 6px;
-          border: 1px solid rgba(74, 222, 128, 0.2);
+          border: 1px solid #bbf7d0;
         }
 
         .close-btn {
           position: absolute;
           top: 0;
           right: 0;
-          background: rgba(96, 165, 250, 0.1);
-          border: 1px solid rgba(96, 165, 250, 0.2);
+          background-color: #f1f5f9;
+          border: 1px solid #e2e8f0;
           width: 32px;
           height: 32px;
           border-radius: 6px;
@@ -277,13 +275,13 @@ export default function ProfileDropdown() {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: #8b94a5;
+          color: #64748b;
           transition: all 0.2s;
         }
 
         .close-btn:hover {
-          background: rgba(96, 165, 250, 0.2);
-          color: #60a5fa;
+          background: #e0f2fe;
+          color: #2563eb;
         }
 
         .info-group {
@@ -298,7 +296,7 @@ export default function ProfileDropdown() {
         .info-label {
           font-size: 11px;
           font-weight: 600;
-          color: #8b94a5;
+          color: #64748b;
           text-transform: uppercase;
           letter-spacing: 0.5px;
           margin-bottom: 6px;
@@ -306,37 +304,37 @@ export default function ProfileDropdown() {
 
         .info-value {
           font-size: 13px;
-          color: #d1d8e0;
+          color: #334155;
           display: flex;
           align-items: center;
           gap: 8px;
         }
 
         .info-value svg {
-          color: #60a5fa;
+          color: #2563eb;
           flex-shrink: 0;
         }
 
         .field-input {
           width: 100%;
           padding: 8px 10px;
-          border: 1px solid rgba(42, 63, 82, 0.6);
+          border: 1px solid #e5e7eb;
           border-radius: 6px;
           font-size: 13px;
-          color: #f0f4f8;
-          background: rgba(15, 23, 42, 0.5);
+          color: #0f172a;
+          background: #f8fafc;
           font-family: 'Inter', sans-serif;
           transition: all 0.2s;
           margin-bottom: 12px;
         }
 
         .field-input::placeholder {
-          color: #6b7a8a;
+          color: #94a3b8;
         }
 
         .field-input:focus {
           outline: none;
-          border-color: #60a5fa;
+          border-color: #2563eb;
           background: rgba(15, 23, 42, 0.8);
           box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
         }
@@ -365,7 +363,7 @@ export default function ProfileDropdown() {
         }
 
         .btn-primary-small {
-          background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+          background-color: #2563eb;
           color: #fff;
           border: 1px solid rgba(96, 165, 250, 0.3);
         }
@@ -375,8 +373,8 @@ export default function ProfileDropdown() {
         }
 
         .btn-secondary-small {
-          background: rgba(96, 165, 250, 0.1);
-          color: #60a5fa;
+          background-color: #eff6ff;
+          color: #2563eb;
           border: 1px solid rgba(96, 165, 250, 0.3);
         }
 
@@ -385,8 +383,8 @@ export default function ProfileDropdown() {
         }
 
         .btn-danger-small {
-          background: rgba(239, 68, 68, 0.1);
-          color: #f87171;
+          background-color: #fee2e2;
+          color: #dc2626;
           border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
@@ -395,11 +393,11 @@ export default function ProfileDropdown() {
         }
 
         .error-msg {
-          color: #f87171;
+          color: #dc2626;
           font-size: 12px;
           margin-bottom: 12px;
           padding: 8px;
-          background: rgba(239, 68, 68, 0.1);
+          background-color: #fee2e2;
           border-radius: 6px;
         }
 
@@ -408,7 +406,7 @@ export default function ProfileDropdown() {
           align-items: center;
           justify-content: center;
           padding: 40px 20px;
-          color: #8b94a5;
+          color: #64748b;
         }
       `}</style>
 
@@ -419,7 +417,7 @@ export default function ProfileDropdown() {
             <div className="profile-name">{profileData.firstName} {profileData.lastName}</div>
             <div className="profile-role">{roleDisplay}</div>
           </div>
-          <ChevronDown size={18} color="#8b94a5" />
+          <ChevronDown size={18} color="#64748b" />
         </button>
 
         <div className={`profile-dropdown ${isOpen ? 'open' : ''}`}>
@@ -487,12 +485,6 @@ export default function ProfileDropdown() {
                   </div>
                 </div>
 
-                <div className="action-buttons">
-                  <button className="btn-small btn-primary-small" onClick={handleEdit}>
-                    <Edit2 size={14} />
-                    Edit Profile
-                  </button>
-                </div>
               </>
             ) : (
               <>
