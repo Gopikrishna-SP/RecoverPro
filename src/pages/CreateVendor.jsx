@@ -1,264 +1,75 @@
 import { useState } from 'react';
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, X } from 'lucide-react';
 
 const styles = `
-/* ============================================
-   SHARED STYLES FOR:
-   CreateVendor.jsx
-   CreateVendorAdmin.jsx  
-   CreateFieldExecutive.jsx
-   ============================================ */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.modal-content { background: #ffffff; border-radius: 24px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3); max-width: 500px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal-header { background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%); border-bottom: 1px solid #e0e7ff; padding: 32px 36px; display: flex; justify-content: space-between; align-items: flex-start; border-radius: 24px 24px 0 0; flex-shrink: 0; }
+.modal-header h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.5px; }
+.modal-header p { font-size: 14px; color: #64748b; font-weight: 500; line-height: 1.4; }
+.close-btn { background: #f1f5f9; border: none; cursor: pointer; color: #64748b; padding: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease; flex-shrink: 0; margin-left: 16px; border-radius: 10px; width: 40px; height: 40px; }
+.close-btn:hover { background: #e2e8f0; color: #0f172a; transform: rotate(90deg); }
+.modal-body { 
+  padding: 28px; 
+  flex: 1; 
+  overflow-y: auto; 
+  overflow-x: hidden; 
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f8fafc;
-  min-height: 100vh;
-  color: #334155;
+.modal-body::-webkit-scrollbar { 
+  width: 4px; 
 }
 
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 32px;
+.modal-body::-webkit-scrollbar-track { 
+  background: transparent; 
 }
 
-.header {
-  margin-bottom: 32px;
+.modal-body::-webkit-scrollbar-thumb { 
+  background-color: #cbd5e1; 
+  border-radius: 2px; 
+  border: 1px solid transparent;
 }
 
-.header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 8px;
+.modal-body::-webkit-scrollbar-thumb:hover { 
+  background-color: #94a3b8; 
 }
-
-.header p {
-  font-size: 14px;
-  color: #64748b;
-}
-
-.form-container {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.form-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 24px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 12px 16px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  color: #334155;
-  font-size: 14px;
-  font-family: inherit;
-  transition: all 0.3s ease;
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: #cbd5e1;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #2563eb;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-group select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
-}
-
-.form-group select option {
-  background: #ffffff;
-  color: #334155;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.password-toggle:hover {
-  color: #2563eb;
-}
-
-.btn-group {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 32px;
-}
-
-.btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-secondary {
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  color: #64748b;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #eff6ff;
-  border-color: #2563eb;
-  color: #0f172a;
-}
-
-.btn-secondary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-}
-
-.alert.success {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #059669;
-}
-
-.alert.error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #dc2626;
-}
-
-.required {
-  color: #dc2626;
-  font-weight: 600;
-}
-
-@media (max-width: 600px) {
-  .container {
-    padding: 16px;
-  }
-
-  .form-container {
-    padding: 24px;
-  }
-
-  .header h1 {
-    font-size: 24px;
-  }
-
-  .form-title {
-    font-size: 18px;
-  }
-
-  .btn-group {
-    flex-direction: column-reverse;
-  }
-
-  .btn {
-    width: 100%;
-  }
-}
+.form-title { font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1.2px; }
+.form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
+.form-group label { font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.8px; }
+.form-group input, .form-group select { width: 100%; padding: 12px 16px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; color: #334155; font-size: 14px; font-weight: 500; font-family: inherit; transition: all 0.3s ease; }
+.form-group input::placeholder { color: #cbd5e1; font-weight: 400; }
+.form-group input:hover, .form-group select:hover { border-color: #cbd5e1; background: #ffffff; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: #3b82f6; background: #ffffff; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08); }
+.form-group input:disabled, .form-group select:disabled { opacity: 0.6; cursor: not-allowed; background: #f1f5f9; }
+.form-group select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+.btn-group { display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; padding-top: 20px; border-top: 1px solid #e2e8f0; flex-shrink: 0; }
+.btn { padding: 12px 28px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.3s ease; letter-spacing: 0.3px; }
+.btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; flex: 1; }
+.btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transform: translateY(-2px); box-shadow: 0 12px 24px rgba(37, 99, 235, 0.35); }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-secondary { background: #f1f5f9; border: 1.5px solid #e2e8f0; color: #475569; flex: 1; }
+.btn-secondary:hover:not(:disabled) { background: #eff6ff; border-color: #3b82f6; color: #0f172a; transform: translateY(-2px); }
+.btn-secondary:disabled { opacity: 0.55; cursor: not-allowed; }
+.alert { padding: 14px 16px; border-radius: 10px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; font-weight: 500; line-height: 1.5; animation: slideDown 0.3s ease-out; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.alert.success { background: rgba(16, 185, 129, 0.12); border: 1.5px solid rgba(16, 185, 129, 0.35); color: #059669; }
+.alert.error { background: rgba(239, 68, 68, 0.12); border: 1.5px solid rgba(239, 68, 68, 0.35); color: #dc2626; }
+.required { color: #ef4444; font-weight: 700; }
+@media (max-width: 600px) { .modal-header { padding: 28px 28px 24px; } .modal-body { padding: 28px; } .modal-header h1 { font-size: 24px; } .btn-group { flex-direction: column-reverse; gap: 10px; } .btn { width: 100%; } }
 `;
 
-export default function CreateVendor() {
+export default function CreateVendor({ onClose }) {
   const [formData, setFormData] = useState({ name: '', type: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const vendorTypes = [
-    'Collection Agency',
-    'Legal Firm',
-    'Recovery Agent',
-    'Field Verification',
-    'Process Server',
-    'Other'
-  ];
+  const vendorTypes = ['Collection Agency', 'Legal Firm', 'Recovery Agent', 'Field Verification', 'Process Server', 'Other'];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -279,15 +90,13 @@ export default function CreateVendor() {
       const response = await fetch('/api/super/vendor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          type: formData.type.trim()
-        }),
+        body: JSON.stringify({ name: formData.name.trim(), type: formData.type.trim() }),
       });
 
       if (response.ok) {
         setSuccess('Vendor created successfully!');
         setFormData({ name: '', type: '' });
+        setTimeout(() => onClose?.(), 1500);
       } else {
         const errorData = await response.json().catch(() => ({}));
         setError(errorData.message || 'Failed to create vendor');
@@ -308,52 +117,45 @@ export default function CreateVendor() {
   return (
     <>
       <style>{styles}</style>
-      <div className="container">
-        <div className="header">
-          <h1>Create Vendor</h1>
-          <p>Add a new vendor to the system</p>
-        </div>
-
-        <div className="form-container">
-          <div className="form-title">Vendor Information</div>
-
-          {error && <div className="alert error"><AlertCircle size={16} />{error}</div>}
-          {success && <div className="alert success"><CheckCircle size={16} />{success}</div>}
-
-          <div className="form-group">
-            <label>Vendor Name <span className="required">*</span></label>
-            <input 
-              type="text" 
-              name="name"
-              value={formData.name} 
-              onChange={handleChange} 
-              placeholder="Enter vendor name" 
-              disabled={loading}
-            />
+      <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose?.()}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <div>
+              <h1>Create Vendor</h1>
+              <p>Add a new vendor to the system</p>
+            </div>
+            <button className="close-btn" onClick={onClose} title="Close">
+              <X size={20} />
+            </button>
           </div>
 
-          <div className="form-group">
-            <label>Vendor Type <span className="required">*</span></label>
-            <select 
-              name="type"
-              value={formData.type} 
-              onChange={handleChange}
-              disabled={loading}
-            >
-              <option value="">Select vendor type</option>
-              {vendorTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
+          <div className="modal-body">
+            <div className="form-title">Vendor Information</div>
 
-          <div className="btn-group">
-            <button className="btn btn-secondary" onClick={handleClear} disabled={loading}>
-              Clear
-            </button>
-            <button className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
-              {loading ? 'Creating...' : 'Create Vendor'}
-            </button>
+            {error && <div className="alert error"><AlertCircle size={18} /><span>{error}</span></div>}
+            {success && <div className="alert success"><CheckCircle size={18} /><span>{success}</span></div>}
+
+            <div className="form-group">
+              <label>Vendor Name <span className="required">*</span></label>
+              <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Enter vendor name" disabled={loading} />
+            </div>
+
+            <div className="form-group">
+              <label>Vendor Type <span className="required">*</span></label>
+              <select name="type" value={formData.type} onChange={handleChange} disabled={loading}>
+                <option value="">Select vendor type</option>
+                {vendorTypes.map(type => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </div>
+
+            <div className="btn-group">
+              <button className="btn btn-secondary" onClick={handleClear} disabled={loading}>
+                Clear
+              </button>
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
+                {loading ? 'Creating...' : 'Create Vendor'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

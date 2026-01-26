@@ -1,3 +1,6 @@
+// src/utils/auth.js
+// Authentication utilities and token management
+
 export function getToken() {
   // support both keys for compatibility across repos
   const t1 = localStorage.getItem('authToken');
@@ -19,19 +22,49 @@ export function setToken(token) {
 
 export function getAuthHeaders(isJson = true) {
   const token = getToken();
-  const headers = { ...(isJson ? { 'Content-Type': 'application/json' } : {}) };
-  if (token) headers.Authorization = `Bearer ${token}`;
+  const headers = { 
+    ...(isJson ? { 'Content-Type': 'application/json' } : {}),
+    'Accept': 'application/json'
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
   return headers;
 }
 
 export function logout(redirect = true) {
   localStorage.removeItem('authToken');
+  localStorage.removeItem('token');
   localStorage.removeItem('user');
-  if (redirect) window.location.href = '/signin';
+  localStorage.removeItem('rememberEmail');
+  if (redirect) {
+    window.location.href = '/signin';
+  }
 }
 
 export async function fetchWithAuth(url, options = {}) {
-  const headers = { ...(options.headers || {}), ...getAuthHeaders() };
-  const res = await fetch(url, { ...options, headers });
-  return res;
+  try {
+    const headers = { 
+      ...(options.headers || {}), 
+      ...getAuthHeaders(options.headers?.['Content-Type'] !== 'multipart/form-data')
+    };
+    
+    const config = {
+      ...options,
+      headers
+    };
+
+    const response = await fetch(url, config);
+
+    // Handle unauthorized responses
+    if (response.status === 401) {
+      logout(true);
+      return response;
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
 }

@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Mail } from "lucide-react";
-
-// API Configuration
-const API_BASE_URL = 'http://localhost:8080/api';
+import { AUTH_API } from "../config/apiConfig";
+import { setToken } from "../api/auth";
 
 export default function SigninPage() {
   const [email, setEmail] = useState("");
@@ -20,7 +19,7 @@ export default function SigninPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+      const response = await fetch(AUTH_API.SIGNIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,7 +41,7 @@ export default function SigninPage() {
       const { token, username, email: userEmail, id, roles } = data;
 
       // Store token and user info
-      localStorage.setItem('authToken', token);
+      setToken(token);
       localStorage.setItem('user', JSON.stringify({
         id,
         username,
@@ -124,7 +123,7 @@ export default function SigninPage() {
           display: block;
           font-size: 10px;
           font-weight: 600;
-          color: #var(--text-secondary);
+          color: var(--text-secondary);
           margin-bottom: 8px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -170,14 +169,6 @@ export default function SigninPage() {
 
         .form-actions {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-          margin-top: 12px;
-        }
-
-        .form-actions {
-          display: flex;
           justify-content: flex-end;
           align-items: center;
           margin-bottom: 24px;
@@ -197,8 +188,6 @@ export default function SigninPage() {
           text-decoration: underline;
         }
 
-
-
         .alert {
           padding: 12px;
           border-radius: 8px;
@@ -208,8 +197,8 @@ export default function SigninPage() {
         }
 
         .alert-danger {
-          background: rgba(220, 38, 38, 0.1) /* keep as-is OR later make var */;
-          color: #fca5a5 /* keep for now */;
+          background: rgba(220, 38, 38, 0.1);
+          color: #fca5a5;
           border-color: #7f1d1d;
         }
 

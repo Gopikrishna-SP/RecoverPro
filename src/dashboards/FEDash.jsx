@@ -3,6 +3,8 @@ import { MapPin, FileText, CheckCircle, Clock, Phone, Navigation, Loader } from 
 import StartVisit from '../pages/StartVisit';
 import CaseDetailsPage from '../pages/CaseDetails';
 import { AddressesPage } from '../pages/AddressModal';
+import { FE_API } from '../config/apiConfig';
+import { getToken } from '../api/auth';
 
 const styles = `
   * {
@@ -370,8 +372,6 @@ export default function FieldExecutiveDashboard() {
   const [selectedLoanNumber, setSelectedLoanNumber] = useState(null);
   const [selectedVisitData, setSelectedVisitData] = useState(null);
 
-  const API_BASE = 'http://localhost:8080/api/fe';
-
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -380,25 +380,35 @@ export default function FieldExecutiveDashboard() {
     try {
       setLoading(true);
       setError(null);
+      const token = getToken();
 
-      const statsRes = await fetch(`${API_BASE}/dashboard/stats`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
+      if (!token) {
+        setError('No authentication token found. Please sign in again.');
+        window.location.href = '/signin';
+        return;
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+
+      const statsRes = await fetch(FE_API.DASHBOARD_STATS, { headers });
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         setStats(statsData);
+      } else if (statsRes.status === 401) {
+        window.location.href = '/signin';
+        return;
       }
 
-      const casesRes = await fetch(`${API_BASE}/dashboard/cases`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
+      const casesRes = await fetch(FE_API.DASHBOARD_CASES, { headers });
       if (casesRes.ok) {
         const casesData = await casesRes.json();
         setCases(casesData);
+      } else if (casesRes.status === 401) {
+        window.location.href = '/signin';
+        return;
       }
 
       setLoading(false);

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Users, Building2, Landmark, Bell, Plus, X } from 'lucide-react';
 import { API_BASE } from '../config';
 import { getAuthHeaders } from '../api/auth';
+
 const styles = `
   * {
     margin: 0;
@@ -311,6 +312,7 @@ const styles = `
     font-size: 14px;
     font-family: inherit;
     transition: all 0.3s ease;
+    box-sizing: border-box;
   }
 
   .form-group input::placeholder,
@@ -339,6 +341,7 @@ const styles = `
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 8px;
+    box-sizing: border-box;
   }
 
   .submit-btn:hover {
@@ -430,6 +433,65 @@ const styles = `
     padding: 24px;
   }
 
+  .modal-body .form-group {
+    margin-bottom: 20px;
+  }
+
+  .modal-body .form-group input,
+  .modal-body .form-group textarea,
+  .modal-body .form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #334155;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  .modal-body .form-group input::placeholder,
+  .modal-body .form-group textarea::placeholder {
+    color: #cbd5e1;
+  }
+
+  .modal-body .form-group input:focus,
+  .modal-body .form-group textarea:focus,
+  .modal-body .form-group select:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #f8fafc;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .modal-body .submit-btn {
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+    box-sizing: border-box;
+  }
+
+  .modal-body .submit-btn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+
+  .modal-body .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .success-msg {
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.3);
@@ -490,8 +552,6 @@ export default function SuperAdminDashboard() {
     fo: { firstName: '', lastName: '', username: '', email: '', password: '', phone: '', location: '', organization: '', bankId: '', vendorId: '' },
     notification: { title: '', message: '' }
   });
-
-  // auth headers provided by ../api/auth -> getAuthHeaders()
 
   const messageTimerRef = useRef(null);
 
@@ -831,177 +891,174 @@ export default function SuperAdminDashboard() {
         )}
       </div>
 
-      <div className={`modal ${modal.open ? 'open' : ''}`} onClick={closeModal}>
+      <div className={`modal-overlay ${modal.open ? 'open' : ''}`} onClick={closeModal}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
-            <h3>{modal.type === 'bank' && 'Create Bank'} {modal.type === 'vendor' && 'Create Vendor'} {modal.type === 'bankAdmin' && 'Create Bank Admin'} {modal.type === 'vendorAdmin' && 'Create Vendor Admin'} {modal.type === 'fo' && 'Create Field Officer'}</h3>
+            <h3>
+              {modal.type === 'bank' && 'Create Bank'}
+              {modal.type === 'vendor' && 'Create Vendor'}
+              {modal.type === 'bankAdmin' && 'Create Bank Admin'}
+              {modal.type === 'vendorAdmin' && 'Create Vendor Admin'}
+              {modal.type === 'fo' && 'Create Field Officer'}
+            </h3>
             <button className="close-btn" onClick={closeModal}><X size={24} /></button>
           </div>
 
-          {modal.type === 'bank' && (
-            <form onSubmit={createBank}>
-              <div className="form-group"><label>Bank Name</label><input type="text" placeholder="Enter bank name" value={formData.bank.bankName} onChange={(e) => handleInputChange('bank', 'bankName', e.target.value)} required /></div>
-              <button type="submit" className="submit-btn">Create Bank</button>
-            </form>
-          )}
+          <div className="modal-body">
+            {modal.type === 'bank' && (
+              <form onSubmit={createBank}>
+                <div className="form-group">
+                  <label>Bank Name</label>
+                  <input type="text" placeholder="Enter bank name" value={formData.bank.bankName} onChange={(e) => handleInputChange('bank', 'bankName', e.target.value)} required />
+                </div>
+                <button type="submit" className="submit-btn">Create Bank</button>
+              </form>
+            )}
 
-          {modal.type === 'vendor' && (
-            <form onSubmit={createVendor}>
-              <div className="form-group"><label>Bank ID</label><input type="number" placeholder="Enter bank ID" value={formData.vendor.bankId} onChange={(e) => handleInputChange('vendor', 'bankId', e.target.value)} required /></div>
-              <div className="form-group"><label>Vendor Name</label><input type="text" placeholder="Enter vendor name" value={formData.vendor.name} onChange={(e) => handleInputChange('vendor', 'name', e.target.value)} required /></div>
-              <button type="submit" className="submit-btn">Create Vendor</button>
-            </form>
-          )}
+            {modal.type === 'vendor' && (
+              <form onSubmit={createVendor}>
+                <div className="form-group">
+                  <label>Bank ID</label>
+                  <input type="number" placeholder="Enter bank ID" value={formData.vendor.bankId} onChange={(e) => handleInputChange('vendor', 'bankId', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Vendor Name</label>
+                  <input type="text" placeholder="Enter vendor name" value={formData.vendor.name} onChange={(e) => handleInputChange('vendor', 'name', e.target.value)} required />
+                </div>
+                <button type="submit" className="submit-btn">Create Vendor</button>
+              </form>
+            )}
 
-          {modal.type === 'bankAdmin' && (
-            <form onSubmit={createBankAdmin}>
-              <div className="form-group"><label>Bank ID</label><input type="number" placeholder="Enter bank ID" value={formData.bankAdmin.bankId} onChange={(e) => handleInputChange('bankAdmin', 'bankId', e.target.value)} required /></div>
-              <div className="form-group"><label>First Name</label><input type="text" placeholder="Enter first name" value={formData.bankAdmin.firstName} onChange={(e) => handleInputChange('bankAdmin', 'firstName', e.target.value)} required /></div>
-              <div className="form-group"><label>Last Name</label><input type="text" placeholder="Enter last name" value={formData.bankAdmin.lastName} onChange={(e) => handleInputChange('bankAdmin', 'lastName', e.target.value)} required /></div>
-              <div className="form-group"><label>Username</label><input type="text" placeholder="Enter username" value={formData.bankAdmin.username} onChange={(e) => handleInputChange('bankAdmin', 'username', e.target.value)} required /></div>
-              <div className="form-group"><label>Email</label><input type="email" placeholder="Enter email" value={formData.bankAdmin.email} onChange={(e) => handleInputChange('bankAdmin', 'email', e.target.value)} required /></div>
-              <div className="form-group"><label>Password</label><input type="password" placeholder="Enter password" value={formData.bankAdmin.password} onChange={(e) => handleInputChange('bankAdmin', 'password', e.target.value)} required /></div>
-              <div className="form-group"><label>Phone</label><input type="text" placeholder="Enter phone" value={formData.bankAdmin.phone} onChange={(e) => handleInputChange('bankAdmin', 'phone', e.target.value)} required /></div>
-              <div className="form-group"><label>Location</label><input type="text" placeholder="Enter location" value={formData.bankAdmin.location} onChange={(e) => handleInputChange('bankAdmin', 'location', e.target.value)} required /></div>
-              <div className="form-group"><label>Organization</label><input type="text" placeholder="Enter organization" value={formData.bankAdmin.organization} onChange={(e) => handleInputChange('bankAdmin', 'organization', e.target.value)} required /></div>
-              <button type="submit" className="submit-btn">Create Bank Admin</button>
-            </form>
-          )}
+            {modal.type === 'bankAdmin' && (
+              <form onSubmit={createBankAdmin}>
+                <div className="form-group">
+                  <label>Bank ID</label>
+                  <input type="number" placeholder="Enter bank ID" value={formData.bankAdmin.bankId} onChange={(e) => handleInputChange('bankAdmin', 'bankId', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>First Name</label>
+                  <input type="text" placeholder="Enter first name" value={formData.bankAdmin.firstName} onChange={(e) => handleInputChange('bankAdmin', 'firstName', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Last Name</label>
+                  <input type="text" placeholder="Enter last name" value={formData.bankAdmin.lastName} onChange={(e) => handleInputChange('bankAdmin', 'lastName', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Username</label>
+                  <input type="text" placeholder="Enter username" value={formData.bankAdmin.username} onChange={(e) => handleInputChange('bankAdmin', 'username', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" placeholder="Enter email" value={formData.bankAdmin.email} onChange={(e) => handleInputChange('bankAdmin', 'email', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Password</label>
+                  <input type="password" placeholder="Enter password" value={formData.bankAdmin.password} onChange={(e) => handleInputChange('bankAdmin', 'password', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input type="text" placeholder="Enter phone" value={formData.bankAdmin.phone} onChange={(e) => handleInputChange('bankAdmin', 'phone', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Location</label>
+                  <input type="text" placeholder="Enter location" value={formData.bankAdmin.location} onChange={(e) => handleInputChange('bankAdmin', 'location', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Organization</label>
+                  <input type="text" placeholder="Enter organization" value={formData.bankAdmin.organization} onChange={(e) => handleInputChange('bankAdmin', 'organization', e.target.value)} required />
+                </div>
+                <button type="submit" className="submit-btn">Create Bank Admin</button>
+              </form>
+            )}
 
-          {modal.type === 'vendorAdmin' && (
-            <form onSubmit={createVendorAdmin}>
-              <div className="form-group"><label>Vendor ID</label><input type="number" placeholder="Enter vendor ID" value={formData.vendorAdmin.vendorId} onChange={(e) => handleInputChange('vendorAdmin', 'vendorId', e.target.value)} required /></div>
-              <div className="form-group"><label>First Name</label><input type="text" placeholder="Enter first name" value={formData.vendorAdmin.firstName} onChange={(e) => handleInputChange('vendorAdmin', 'firstName', e.target.value)} required /></div>
-              <div className="form-group"><label>Last Name</label><input type="text" placeholder="Enter last name" value={formData.vendorAdmin.lastName} onChange={(e) => handleInputChange('vendorAdmin', 'lastName', e.target.value)} required /></div>
-              <div className="form-group"><label>Username</label><input type="text" placeholder="Enter username" value={formData.vendorAdmin.username} onChange={(e) => handleInputChange('vendorAdmin', 'username', e.target.value)} required /></div>
-              <div className="form-group"><label>Email</label><input type="email" placeholder="Enter email" value={formData.vendorAdmin.email} onChange={(e) => handleInputChange('vendorAdmin', 'email', e.target.value)} required /></div>
-              <div className="form-group"><label>Password</label><input type="password" placeholder="Enter password" value={formData.vendorAdmin.password} onChange={(e) => handleInputChange('vendorAdmin', 'password', e.target.value)} required /></div>
-              <div className="form-group"><label>Phone</label><input type="text" placeholder="Enter phone" value={formData.vendorAdmin.phone} onChange={(e) => handleInputChange('vendorAdmin', 'phone', e.target.value)} required /></div>
-              <div className="form-group"><label>Location</label><input type="text" placeholder="Enter location" value={formData.vendorAdmin.location} onChange={(e) => handleInputChange('vendorAdmin', 'location', e.target.value)} required /></div>
-              <div className="form-group"><label>Organization</label><input type="text" placeholder="Enter organization" value={formData.vendorAdmin.organization} onChange={(e) => handleInputChange('vendorAdmin', 'organization', e.target.value)} required /></div>
-              <button type="submit" className="submit-btn">Create Vendor Admin</button>
-            </form>
-          )}
+            {modal.type === 'vendorAdmin' && (
+              <form onSubmit={createVendorAdmin}>
+                <div className="form-group">
+                  <label>Vendor ID</label>
+                  <input type="number" placeholder="Enter vendor ID" value={formData.vendorAdmin.vendorId} onChange={(e) => handleInputChange('vendorAdmin', 'vendorId', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>First Name</label>
+                  <input type="text" placeholder="Enter first name" value={formData.vendorAdmin.firstName} onChange={(e) => handleInputChange('vendorAdmin', 'firstName', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Last Name</label>
+                  <input type="text" placeholder="Enter last name" value={formData.vendorAdmin.lastName} onChange={(e) => handleInputChange('vendorAdmin', 'lastName', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Username</label>
+                  <input type="text" placeholder="Enter username" value={formData.vendorAdmin.username} onChange={(e) => handleInputChange('vendorAdmin', 'username', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" placeholder="Enter email" value={formData.vendorAdmin.email} onChange={(e) => handleInputChange('vendorAdmin', 'email', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Password</label>
+                  <input type="password" placeholder="Enter password" value={formData.vendorAdmin.password} onChange={(e) => handleInputChange('vendorAdmin', 'password', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input type="text" placeholder="Enter phone" value={formData.vendorAdmin.phone} onChange={(e) => handleInputChange('vendorAdmin', 'phone', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Location</label>
+                  <input type="text" placeholder="Enter location" value={formData.vendorAdmin.location} onChange={(e) => handleInputChange('vendorAdmin', 'location', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Organization</label>
+                  <input type="text" placeholder="Enter organization" value={formData.vendorAdmin.organization} onChange={(e) => handleInputChange('vendorAdmin', 'organization', e.target.value)} required />
+                </div>
+                <button type="submit" className="submit-btn">Create Vendor Admin</button>
+              </form>
+            )}
 
-          {modal.type === 'fo' && (
-            <form onSubmit={createFO}>
-
-              <div className="form-group">
-                <label>Bank ID</label>
-                <input
-                  type="number"
-                  placeholder="Enter bank ID"
-                  value={formData.fo.bankId}
-                  onChange={(e) => handleInputChange('fo', 'bankId', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Vendor ID</label>
-                <input
-                  type="number"
-                  placeholder="Enter vendor ID"
-                  value={formData.fo.vendorId}
-                  onChange={(e) => handleInputChange('fo', 'vendorId', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>First Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter first name"
-                  value={formData.fo.firstName}
-                  onChange={(e) => handleInputChange('fo', 'firstName', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Last Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter last name"
-                  value={formData.fo.lastName}
-                  onChange={(e) => handleInputChange('fo', 'lastName', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Username</label>
-                <input
-                  type="text"
-                  placeholder="Enter username"
-                  value={formData.fo.username}
-                  onChange={(e) => handleInputChange('fo', 'username', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  placeholder="Enter email"
-                  value={formData.fo.email}
-                  onChange={(e) => handleInputChange('fo', 'email', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  placeholder="Enter password"
-                  value={formData.fo.password}
-                  onChange={(e) => handleInputChange('fo', 'password', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Phone</label>
-                <input
-                  type="text"
-                  placeholder="Enter phone number"
-                  value={formData.fo.phone}
-                  onChange={(e) => handleInputChange('fo', 'phone', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Location</label>
-                <input
-                  type="text"
-                  placeholder="Enter location"
-                  value={formData.fo.location}
-                  onChange={(e) => handleInputChange('fo', 'location', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Organization</label>
-                <input
-                  type="text"
-                  placeholder="Enter organization"
-                  value={formData.fo.organization}
-                  onChange={(e) => handleInputChange('fo', 'organization', e.target.value)}
-                  required
-                />
-              </div>
-
-              <button type="submit" className="submit-btn">
-                Create Field Officer
-              </button>
-            </form>
-          )}
-
+            {modal.type === 'fo' && (
+              <form onSubmit={createFO}>
+                <div className="form-group">
+                  <label>Bank ID</label>
+                  <input type="number" placeholder="Enter bank ID" value={formData.fo.bankId} onChange={(e) => handleInputChange('fo', 'bankId', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Vendor ID</label>
+                  <input type="number" placeholder="Enter vendor ID" value={formData.fo.vendorId} onChange={(e) => handleInputChange('fo', 'vendorId', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>First Name</label>
+                  <input type="text" placeholder="Enter first name" value={formData.fo.firstName} onChange={(e) => handleInputChange('fo', 'firstName', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Last Name</label>
+                  <input type="text" placeholder="Enter last name" value={formData.fo.lastName} onChange={(e) => handleInputChange('fo', 'lastName', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Username</label>
+                  <input type="text" placeholder="Enter username" value={formData.fo.username} onChange={(e) => handleInputChange('fo', 'username', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" placeholder="Enter email" value={formData.fo.email} onChange={(e) => handleInputChange('fo', 'email', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Password</label>
+                  <input type="password" placeholder="Enter password" value={formData.fo.password} onChange={(e) => handleInputChange('fo', 'password', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input type="text" placeholder="Enter phone number" value={formData.fo.phone} onChange={(e) => handleInputChange('fo', 'phone', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Location</label>
+                  <input type="text" placeholder="Enter location" value={formData.fo.location} onChange={(e) => handleInputChange('fo', 'location', e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>Organization</label>
+                  <input type="text" placeholder="Enter organization" value={formData.fo.organization} onChange={(e) => handleInputChange('fo', 'organization', e.target.value)} required />
+                </div>
+                <button type="submit" className="submit-btn">Create Field Officer</button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </>
