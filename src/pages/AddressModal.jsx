@@ -1,12 +1,13 @@
 import { Loader, MapPin, Camera, Navigation, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-export function AddressesPage({ loanNumber, onBack, onStartVisit }) {
+export function AddressesPage({ loanNumber, onBack, onStartVisit, isVendor = false }) {
   const [addresses, setAddresses] = useState([]);
   const [addressLoading, setAddressLoading] = useState(true);
   const [addressError, setAddressError] = useState(null);
 
-  const API_BASE = 'http://localhost:8080/api/fe';
+  const API_BASE_FE = 'http://localhost:8080/api/fe';
+  const API_BASE_VENDOR = 'http://localhost:8080/api/vendor/dashboard';
 
   useEffect(() => {
     fetchAddresses();
@@ -18,14 +19,28 @@ export function AddressesPage({ loanNumber, onBack, onStartVisit }) {
     setAddresses([]);
 
     try {
-      const response = await fetch(`${API_BASE}/cases/${loanNumber}/addresses`, {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setAddressError('Authentication required. Please login again.');
+        setAddressLoading(false);
+        return;
+      }
+
+      const apiUrl = isVendor 
+        ? `${API_BASE_VENDOR}/cases/${loanNumber}/addresses`
+        : `${API_BASE_FE}/cases/${loanNumber}/addresses`;
+
+      const response = await fetch(apiUrl, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
+
       if (response.ok) {
         const data = await response.json();
-        setAddresses(data);
+        setAddresses(Array.isArray(data) ? data : []);
+      } else if (response.status === 404) {
+        setAddressError('No addresses found for this loan.');
       } else {
         setAddressError('Failed to load addresses.');
       }
@@ -34,6 +49,12 @@ export function AddressesPage({ loanNumber, onBack, onStartVisit }) {
       console.error('Fetch error:', err);
     } finally {
       setAddressLoading(false);
+    }
+  };
+
+  const handleStartVisit = (address) => {
+    if (onStartVisit) {
+      onStartVisit(loanNumber, address);
     }
   };
 
@@ -168,6 +189,7 @@ export function AddressesPage({ loanNumber, onBack, onStartVisit }) {
       color: #334155;
       line-height: 1.6;
       font-weight: 500;
+      word-break: break-word;
     }
 
     .address-actions {
@@ -298,7 +320,7 @@ export function AddressesPage({ loanNumber, onBack, onStartVisit }) {
                 <div className="address-actions">
                   <button
                     className="action-btn action-primary"
-                    onClick={() => onStartVisit(loanNumber, address)}
+                    onClick={() => handleStartVisit(address)}
                   >
                     <Camera size={14} /> Start
                   </button>

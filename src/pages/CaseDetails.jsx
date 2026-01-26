@@ -1,12 +1,12 @@
 import { Loader, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-export default function CaseDetailsPage({ loanNumber, onBack }) {
-  const [caseDetails, setCaseDetails] = useState([]);
+export default function CaseDetailsPage({ loanNumber, onBack, isVendor = false }) {
+  const [caseDetails, setCaseDetails] = useState(null);
   const [caseDetailsLoading, setCaseDetailsLoading] = useState(true);
   const [caseDetailsError, setCaseDetailsError] = useState(null);
 
-  const API_BASE = 'http://localhost:8080/api/fe';
+  const API_BASE_FE = 'http://localhost:8080/api/fe';
 
   useEffect(() => {
     fetchCaseDetails();
@@ -15,18 +15,37 @@ export default function CaseDetailsPage({ loanNumber, onBack }) {
   const fetchCaseDetails = async () => {
     setCaseDetailsLoading(true);
     setCaseDetailsError(null);
-    setCaseDetails([]);
+    setCaseDetails(null);
 
     try {
-      const response = await fetch(`${API_BASE}/cases`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setCaseDetailsError('Authentication required. Please login again.');
+        setCaseDetailsLoading(false);
+        return;
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
+
+      const apiUrl = isVendor 
+        ? 'http://localhost:8080/api/vendor/dashboard/my-cases'
+        : `${API_BASE_FE}/cases`;
+
+      const response = await fetch(apiUrl, { headers });
+
       if (response.ok) {
         const data = await response.json();
-        const filteredData = data.filter(item => item.loanNumber === loanNumber);
-        setCaseDetails(filteredData);
+        const filteredCase = Array.isArray(data) 
+          ? data.find(item => item.loanNumber === loanNumber)
+          : null;
+        
+        if (filteredCase) {
+          setCaseDetails(filteredCase);
+        } else {
+          setCaseDetailsError('Case details not found.');
+        }
       } else {
         setCaseDetailsError('Failed to load case details.');
       }
@@ -140,6 +159,7 @@ export default function CaseDetailsPage({ loanNumber, onBack }) {
       color: #334155;
       word-break: break-word;
       line-height: 1.5;
+      display: block;
     }
 
     .loading-container {
@@ -218,9 +238,9 @@ export default function CaseDetailsPage({ loanNumber, onBack }) {
             <Loader size={40} />
             <span style={{ marginTop: '16px', fontSize: '16px' }}>Loading case details...</span>
           </div>
-        ) : caseDetails.length > 0 ? (
+        ) : caseDetails ? (
           <div className="details-grid">
-            {Object.entries(caseDetails[0]).map(([key, value]) => (
+            {Object.entries(caseDetails).map(([key, value]) => (
               <div key={key} className="detail-field">
                 <label>{key.replace(/([A-Z])/g, ' $1').trim()}</label>
                 <span>{value || '-'}</span>

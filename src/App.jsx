@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import SigninPage from './pages/SigninPage';
+import PasswordReset from './pages/PasswordReset';
 import DashboardLayout from './layouts/DashboardLayout';
 import PublicLayout from './layouts/PublicLayout';
 
@@ -22,6 +23,16 @@ export default function App() {
         element={
           <PublicLayout>
             <SigninPage />
+          </PublicLayout>
+        }
+      />
+
+      {/* FORGOT PASSWORD */}
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicLayout>
+            <PasswordReset />
           </PublicLayout>
         }
       />

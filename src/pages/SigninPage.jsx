@@ -303,7 +303,7 @@ export default function SigninPage() {
           <p className="signin-subtitle">Sign in to access your recovery workspace</p>
         </div>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} noValidate>
           <div className="form-group">
             <label className="form-label">Work Email</label>
             <div className="form-input-wrapper">
@@ -337,7 +337,7 @@ export default function SigninPage() {
           </div>
 
           <div className="form-actions">
-            <a href="#forgot" style={{ fontSize: '13px', color: 'var(--primary)', textDecoration: 'none', fontWeight: '600' }}>
+            <a href="/forgot-password" style={{ fontSize: '13px', color: 'var(--primary)', textDecoration: 'none', fontWeight: '600' }}>
               Forgot password?
             </a>
           </div>

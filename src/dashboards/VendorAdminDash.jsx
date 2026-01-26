@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, Briefcase, CheckCircle, AlertCircle, Eye, Loader, AlertTriangle, X, FileText, Phone, MapPin } from 'lucide-react';
+import { Users, Briefcase, CheckCircle, AlertCircle, Eye, Loader, AlertTriangle, X, FileText, Phone, MapPin, ChevronLeft } from 'lucide-react';
 import CaseDetailsPage from '../pages/CaseDetails';
 import { AddressesPage } from '../pages/AddressModal';
+import StartVisit from '../pages/StartVisit';
 
 const styles = `
   * {
@@ -163,13 +164,6 @@ const styles = `
     padding: 24px;
   }
 
-  .card h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #0f172a;
-    margin-bottom: 16px;
-  }
-
   .case-item {
     background-color: #ffffff;
     border: 1px solid #e5e7eb;
@@ -245,28 +239,6 @@ const styles = `
     font-size: 14px;
     color: #334155;
     font-weight: 500;
-  }
-
-  .case-address {
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 16px;
-    display: flex;
-    gap: 12px;
-  }
-
-  .case-address-icon {
-    color: #2563eb;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .address-text {
-    font-size: 13px;
-    color: #64748b;
-    line-height: 1.5;
   }
 
   .case-actions {
@@ -357,53 +329,6 @@ const styles = `
     color: #059669;
   }
 
-  .status-unassigned {
-    background: rgba(245, 158, 11, 0.2);
-    color: #d97706;
-  }
-
-  .status-pending {
-    background: rgba(245, 158, 11, 0.2);
-    color: #d97706;
-  }
-
-  .status-inprogress {
-    background: rgba(59, 130, 246, 0.2);
-    color: #2563eb;
-  }
-
-  .status-completed {
-    background: rgba(16, 185, 129, 0.2);
-    color: #059669;
-  }
-
-  .action-btn-table {
-    background: none;
-    border: none;
-    color: #2563eb;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    font-family: inherit;
-  }
-
-  .action-btn-table:hover {
-    background: rgba(37, 99, 235, 0.1);
-    color: #1d4ed8;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #64748b;
-  }
-
   .error-banner {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
@@ -416,142 +341,6 @@ const styles = `
     gap: 12px;
   }
 
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-
-  .modal-content {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 900px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #eff6ff;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .modal-header h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0;
-  }
-
-  .close-btn {
-    background: none;
-    border: none;
-    color: #64748b;
-    cursor: pointer;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    font-family: inherit;
-  }
-
-  .close-btn:hover {
-    background: rgba(59, 130, 246, 0.1);
-    color: #2563eb;
-  }
-
-  .modal-body {
-    padding: 24px;
-  }
-
-  .officer-card {
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    transition: all 0.3s ease;
-  }
-
-  .officer-card:hover {
-    border-color: #2563eb;
-    background: #eff6ff;
-  }
-
-  .officer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-  }
-
-  .officer-header h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #0f172a;
-  }
-
-  .officer-header p {
-    font-size: 13px;
-    color: #64748b;
-    margin-top: 4px;
-  }
-
-  .officer-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  .stat-item {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 16px;
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .stat-item:hover {
-    background: #f8fafc;
-    border-color: #2563eb;
-  }
-
-  .stat-item label {
-    font-size: 11px;
-    color: #64748b;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    display: block;
-    margin-bottom: 8px;
-  }
-
-  .stat-item span {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2563eb;
-  }
-
   .modal-loading {
     display: flex;
     align-items: center;
@@ -561,13 +350,13 @@ const styles = `
     gap: 12px;
   }
 
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+  }
+
   @media (max-width: 1024px) {
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .officer-stats {
-      grid-template-columns: 1fr;
-    }
     .case-details {
       grid-template-columns: 1fr;
     }
@@ -588,12 +377,6 @@ const styles = `
     .header-left h1 {
       font-size: 28px;
     }
-    .table-container {
-      font-size: 12px;
-    }
-    td, th {
-      padding: 8px;
-    }
   }
 `;
 
@@ -610,15 +393,19 @@ export default function VendorAdminDashboard() {
   const [selectedOfficer, setSelectedOfficer] = useState(null);
   const [officerPerformance, setOfficerPerformance] = useState(null);
   const [performanceLoading, setPerformanceLoading] = useState(false);
-  const [performanceError, setPerformanceError] = useState(null);
 
   const [selectedLoanNumber, setSelectedLoanNumber] = useState(null);
+  const [selectedVisitData, setSelectedVisitData] = useState(null);
 
   const API_BASE_URL = 'http://localhost:8080/api/vendor/dashboard';
 
   const getAuthToken = () => {
     return localStorage.getItem('authToken') || sessionStorage.getItem('authToken') || '';
   };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
@@ -636,74 +423,48 @@ export default function VendorAdminDashboard() {
         fetch(`${API_BASE_URL}/cases`, { method: 'GET', headers, credentials: 'include' }),
       ]);
 
-      if (statsRes.status === 401 || officersRes.status === 401 || casesRes.status === 401) {
-        setError('Unauthorized - Please login again');
-        setLoading(false);
-        return;
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats({
+          visitsPendingToday: statsData.visitsPendingToday || 0,
+          collectionsToday: statsData.collectionsToday || 0,
+          visitsCompletedToday: statsData.visitsCompletedToday || 0,
+          totalActiveCases: statsData.totalActiveCases || 0,
+        });
       }
 
-      if (!statsRes.ok || !officersRes.ok || !casesRes.ok) {
-        throw new Error('Failed to fetch dashboard data');
+      if (officersRes.ok) {
+        const officersData = await officersRes.json();
+        setFieldOfficers(Array.isArray(officersData) ? officersData : []);
       }
 
-      const statsData = await statsRes.json();
-      const officersData = await officersRes.json();
-      const casesData = await casesRes.json();
-
-      // Transform stats response to match dashboard card format
-      setStats({
-        visitsPendingToday: statsData.visitsPendingToday || 0,
-        collectionsToday: statsData.collectionsToday || 0,
-        visitsCompletedToday: statsData.visitsCompletedToday || 0,
-        totalActiveCases: statsData.totalActiveCases || 0,
-      });
-
-      // Transform field officers - map to expected format
-      const transformedOfficers = (Array.isArray(officersData) ? officersData : []).map(officer => ({
-        id: officer.id,
-        name: officer.name,
-        email: officer.email,
-        status: officer.status,
-        pendingCases: officer.pendingCases || 0,
-        totalCases: officer.totalCases || 0,
-        completedCases: officer.completedCases || 0,
-        completionRate: officer.completionRate || 0,
-      }));
-
-      setFieldOfficers(transformedOfficers);
-
-      // Transform cases - map to expected format
-      const transformedCases = (Array.isArray(casesData) ? casesData : []).map(caseItem => ({
-        caseId: caseItem.caseId || caseItem.id,
-        loanNumber: caseItem.loanNumber,
-        borrowerName: caseItem.borrowerName || caseItem.customerName,
-        customerName: caseItem.customerName,
-        location: caseItem.location,
-        phone: caseItem.phone,
-        address: caseItem.address,
-        loanAmount: caseItem.loanAmount,
-        status: caseItem.status || 'ASSIGNED',
-      }));
-
-      setCases(transformedCases);
+      if (casesRes.ok) {
+        const casesData = await casesRes.json();
+        const transformedCases = (Array.isArray(casesData) ? casesData : []).map(caseItem => ({
+          caseId: caseItem.caseId || caseItem.id,
+          loanNumber: caseItem.loanNumber,
+          borrowerName: caseItem.borrowerName || caseItem.customerName,
+          customerName: caseItem.customerName,
+          location: caseItem.location,
+          phone: caseItem.phone,
+          address: caseItem.address,
+          loanAmount: caseItem.loanAmount,
+          status: caseItem.status || 'ASSIGNED',
+        }));
+        setCases(transformedCases);
+      }
     } catch (err) {
       console.error('Error fetching data:', err);
-      setError(err.message || 'Failed to load dashboard data');
+      setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
   const openOfficerDetailsModal = async (officer) => {
     setSelectedOfficer(officer);
     setShowOfficerModal(true);
     setPerformanceLoading(true);
-    setPerformanceError(null);
-    setOfficerPerformance(null);
 
     try {
       const headers = {
@@ -719,12 +480,9 @@ export default function VendorAdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         setOfficerPerformance(data);
-      } else {
-        setPerformanceError('Failed to load officer performance.');
       }
     } catch (err) {
-      setPerformanceError('Error fetching officer details.');
-      console.error('Fetch error:', err);
+      console.error('Error:', err);
     } finally {
       setPerformanceLoading(false);
     }
@@ -740,13 +498,24 @@ export default function VendorAdminDashboard() {
     setCurrentPage('addresses');
   };
 
+  const handleStartVisit = (loanNumber, address) => {
+    const caseData = cases.find(c => c.loanNumber === loanNumber);
+    setSelectedVisitData({
+      loanNumber,
+      address,
+      borrowerName: caseData?.borrowerName,
+      location: caseData?.location,
+    });
+    setCurrentPage('visit');
+  };
+
   const handleBackToDashboard = () => {
     setCurrentPage('overview');
     setSelectedLoanNumber(null);
+    setSelectedVisitData(null);
   };
 
   const getStatusBadge = (status) => {
-    if (!status) return null;
     const statusMap = {
       ASSIGNED: { className: 'status-assigned', label: 'Assigned' },
       UNASSIGNED: { className: 'status-unassigned', label: 'Unassigned' },
@@ -769,10 +538,9 @@ export default function VendorAdminDashboard() {
         <style>{styles}</style>
         <div className="container">
           <div className="modal-loading">
-            <Loader size={32} style={{ animation: 'spin 1s linear infinite' }} />
+            <Loader size={32} />
             <span>Loading dashboard...</span>
           </div>
-          <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         </div>
       </>
     );
@@ -782,12 +550,11 @@ export default function VendorAdminDashboard() {
     return (
       <>
         <style>{styles}</style>
-        <div className="container">
-          <CaseDetailsPage 
-            loanNumber={selectedLoanNumber} 
-            onBack={handleBackToDashboard}
-          />
-        </div>
+        <CaseDetailsPage
+          loanNumber={selectedLoanNumber}
+          onBack={handleBackToDashboard}
+          isVendor={true}
+        />
       </>
     );
   }
@@ -796,19 +563,77 @@ export default function VendorAdminDashboard() {
     return (
       <>
         <style>{styles}</style>
-        <div className="container">
-          <AddressesPage 
-            loanNumber={selectedLoanNumber} 
-            onBack={handleBackToDashboard}
-            onStartVisit={() => {}}
-          />
-        </div>
+        <AddressesPage
+          loanNumber={selectedLoanNumber}
+          onBack={handleBackToDashboard}
+          isVendor={true}
+          onStartVisit={handleStartVisit}
+        />
       </>
+    );
+  }
+
+  if (currentPage === 'visit') {
+    return (
+      <>
+        <style>{styles}</style>
+        <StartVisit
+          loanData={selectedVisitData}
+          onBack={handleBackToDashboard}
+        />
+      </>
+    );
+  }
+
+  function OfficerDetailsPage({ officer, performance, loading, onBack, formatCurrency }) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', height: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Officer Details</h1>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ChevronLeft size={18} /> Back
+          </button>
+        </div>
+
+        {loading ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+            <Loader size={40} />
+          </div>
+        ) : performance ? (
+          <>
+            <div style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', borderRadius: '12px', padding: '20px', color: 'white' }}>
+              <p style={{ fontSize: '11px', opacity: 0.8, marginBottom: '6px', textTransform: 'uppercase', fontWeight: '600' }}>Officer</p>
+              <p style={{ fontSize: '24px', fontWeight: '700', margin: 0 }}>{officer?.name || 'N/A'}</p>
+              <p style={{ fontSize: '12px', opacity: 0.8, marginTop: '8px' }}>{officer?.email || 'N/A'}</p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+              {[
+                { label: 'Total Cases', value: performance.totalCases },
+                { label: 'Assigned', value: performance.assignedCases },
+                { label: 'Pending', value: performance.pendingCases },
+                { label: 'Completed', value: performance.completedCases },
+                { label: 'Completion Rate', value: `${performance.completionRate}%` },
+                { label: 'Total Collection', value: formatCurrency(performance.totalCollection) },
+              ].map((stat) => (
+                <div key={stat.label} style={{ background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: '700', margin: '0 0 8px 0' }}>{stat.label}</p>
+                  <p style={{ fontSize: '20px', fontWeight: '600', color: '#2563eb', margin: 0 }}>{stat.value}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : null}
+      </div>
     );
   }
 
   return (
     <>
+        <style>{styles}</style>
+    <div className="container">
+      {!showOfficerModal ? (
+        <>
       <style>{styles}</style>
       <div className="container">
         <div className="header">
@@ -848,206 +673,146 @@ export default function VendorAdminDashboard() {
           </div>
         )}
 
-        <div className="tabs">
-          <button
-            className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'cases' ? 'active' : ''}`}
-            onClick={() => setActiveTab('cases')}
-          >
-            Assigned Cases
-          </button>
+        {/* Overview Header */}
+        <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Field Officers</h2>
+          <p style={{ fontSize: '14px', color: '#64748b' }}>Officer performance and pending overview</p>
         </div>
 
-        {activeTab === 'overview' && (
-          <div className="content-grid">
-            <div className="card">
-              <h3>Field Officers – Pending Overview</h3>
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Total Pending</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {fieldOfficers.length > 0 ? (
-                      fieldOfficers.map((officer) => {
-                        const totalPending = officer.pendingCases || 0;
-                        return (
-                          <tr key={officer.id}>
-                            <td>{officer.name || 'N/A'}</td>
-                            <td>{totalPending}</td>
-                            <td>
-                              <button
-                                className="action-btn-table"
-                                onClick={() => openOfficerDetailsModal(officer)}
-                              >
-                                <Eye size={14} /> View
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
-                      <tr>
-                        <td colSpan="3" className="empty-state">
-                          No field officers found
+        {/* Overview Content */}
+        <div className="content-grid">
+          <div className="card">
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Total Pending</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fieldOfficers.length > 0 ? (
+                    fieldOfficers.map((officer) => (
+                      <tr key={officer.id}>
+                        <td>{officer.name || 'N/A'}</td>
+                        <td>{officer.pendingCases || 0}</td>
+                        <td>
+                          <button
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#2563eb',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                            onClick={() => openOfficerDetailsModal(officer)}
+                          >
+                            <Eye size={14} /> View
+                          </button>
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'cases' && (
-          <div className="content-grid">
-            {cases.length > 0 ? (
-              cases.map((caseItem) => (
-                <div key={caseItem.caseId} className="case-item">
-                  <div className="case-header">
-                    <div>
-                      <div className="case-title">{caseItem.borrowerName || caseItem.customerName}</div>
-                      <div className="case-id">
-                        Case ID: {caseItem.caseId} | Loan: {caseItem.loanNumber}
-                      </div>
-                    </div>
-                    {getStatusBadge(caseItem.status)}
-                  </div>
-
-                  <div className="case-details">
-                    <div className="detail-item">
-                      <div className="detail-icon">
-                        <FileText size={16} />
-                      </div>
-                      <div className="detail-content">
-                        <label>Loan Amount</label>
-                        <span>{formatCurrency(caseItem.loanAmount)}</span>
-                      </div>
-                    </div>
-                    <div className="detail-item">
-                      <div className="detail-icon">
-                        <Phone size={16} />
-                      </div>
-                      <div className="detail-content">
-                        <label>Contact</label>
-                        <span>{caseItem.phone || 'N/A'}</span>
-                      </div>
-                    </div>
-                    <div className="detail-item">
-                      <div className="detail-icon">
-                        <MapPin size={16} />
-                      </div>
-                      <div className="detail-content">
-                        <label>Location</label>
-                        <span>{caseItem.location || 'N/A'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {caseItem.address && (
-                    <div className="case-address">
-                      <MapPin size={16} className="case-address-icon" />
-                      <div className="address-text">{caseItem.address}</div>
-                    </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="empty-state">
+                        No field officers found
+                      </td>
+                    </tr>
                   )}
-
-                  <div className="case-actions">
-                    <button 
-                      className="action-btn action-primary"
-                      onClick={() => handleOpenCaseDetails(caseItem.loanNumber)}
-                    >
-                      <FileText size={16} /> Case Details
-                    </button>
-                    <button 
-                      className="action-btn action-secondary"
-                      onClick={() => handleOpenAddresses(caseItem.loanNumber)}
-                    >
-                      <MapPin size={16} /> Addresses
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="card">
-                <p style={{ textAlign: 'center', color: '#94a3b8' }}>No cases assigned yet.</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {showOfficerModal && (
-        <div className="modal-overlay" onClick={() => setShowOfficerModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Field Officer Details</h2>
-              <button className="close-btn" onClick={() => setShowOfficerModal(false)}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal-body">
-              {performanceLoading ? (
-                <div className="modal-loading">
-                  <Loader size={24} style={{ animation: 'spin 1s linear infinite' }} />
-                  <span>Loading officer details...</span>
-                </div>
-              ) : performanceError ? (
-                <div className="error-banner">
-                  <AlertTriangle size={16} />
-                  <div>{performanceError}</div>
-                </div>
-              ) : officerPerformance ? (
-                <div className="officer-card">
-                  <div className="officer-header">
-                    <div>
-                      <h3>{selectedOfficer?.name || 'N/A'}</h3>
-                      <p>{selectedOfficer?.email || 'N/A'}</p>
-                    </div>
-                  </div>
-                  <div className="officer-stats">
-                    <div className="stat-item">
-                      <label>Total Cases</label>
-                      <span>{officerPerformance.totalCases || 0}</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Assigned Cases</label>
-                      <span>{officerPerformance.assignedCases || 0}</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Pending Cases</label>
-                      <span>{officerPerformance.pendingCases || 0}</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Completed Cases</label>
-                      <span>{officerPerformance.completedCases || 0}</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Completion Rate</label>
-                      <span>{officerPerformance.completionRate || 0}%</span>
-                    </div>
-                    <div className="stat-item">
-                      <label>Total Collection</label>
-                      <span>{formatCurrency(officerPerformance.totalCollection || 0)}</span>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-      )}
 
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-    </>
+        {/* Assigned Cases Header */}
+        <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '2px solid #e5e7eb', marginTop: '60px' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Assigned Cases</h2>
+          <p style={{ fontSize: '14px', color: '#64748b' }}>Review and manage your assigned cases</p>
+        </div>
+
+        {/* Assigned Cases Content */}
+        <div className="content-grid">
+          {cases.length > 0 ? (
+            cases.map((caseItem) => (
+              <div key={caseItem.caseId} className="case-item">
+                <div className="case-header">
+                  <div>
+                    <div className="case-title">{caseItem.borrowerName || caseItem.customerName}</div>
+                    <div className="case-id">
+                      Case ID: {caseItem.caseId} | Loan: {caseItem.loanNumber}
+                    </div>
+                  </div>
+                  {getStatusBadge(caseItem.status)}
+                </div>
+
+                <div className="case-details">
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <FileText size={16} />
+                    </div>
+                    <div className="detail-content">
+                      <label>Loan Amount</label>
+                      <span>{formatCurrency(caseItem.loanAmount)}</span>
+                    </div>
+                  </div>
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <Phone size={16} />
+                    </div>
+                    <div className="detail-content">
+                      <label>Contact</label>
+                      <span>{caseItem.phone || 'N/A'}</span>
+                    </div>
+                  </div>
+                  <div className="detail-item">
+                    <div className="detail-icon">
+                      <MapPin size={16} />
+                    </div>
+                    <div className="detail-content">
+                      <label>Location</label>
+                      <span>{caseItem.location || 'N/A'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="case-actions">
+                  <button
+                    className="action-btn action-primary"
+                    onClick={() => handleOpenCaseDetails(caseItem.loanNumber)}
+                  >
+                    <FileText size={16} /> Case Details
+                  </button>
+                  <button
+                    className="action-btn action-secondary"
+                    onClick={() => handleOpenAddresses(caseItem.loanNumber)}
+                  >
+                    <MapPin size={16} /> Addresses
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="card">
+              <p style={{ textAlign: 'center', color: '#94a3b8' }}>No cases assigned yet.</p>
+            </div>
+          )}
+        </div>
+
+      </div>
+
+        </>
+      ) : (
+        <div style={{ background: 'white', borderRadius: '12px', padding: '28px' }}>
+          <OfficerDetailsPage officer={selectedOfficer} performance={officerPerformance} loading={performanceLoading} onBack={() => setShowOfficerModal(false)} formatCurrency={formatCurrency} />
+        </div>
+      )}
+    </div>
+  </>
   );
 }
