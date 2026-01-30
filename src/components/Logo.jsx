@@ -18,7 +18,7 @@ const Logo = () => {
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 229 229"
-            width="16"
+            width="16"  
             height="16"
             shape-rendering="geometricPrecision"
           >
@@ -59,3 +59,5 @@ const Logo = () => {
 };
 
 export default Logo;
+
+
